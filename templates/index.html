@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FoodLink Rescue – Donate Surplus Food</title>
+  <meta name="description" content="FoodLink Rescue connects restaurants with surplus food to NGOs in need." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --green-dark: #064e3b;
+      --green-accent: #10b981;
+      --green-light: #d1fae5;
+      --white: #ffffff;
+      --gray-50: #f9fafb;
+      --gray-100: #f3f4f6;
+      --gray-200: #e5e7eb;
+      --gray-500: #6b7280;
+      --gray-700: #374151;
+      --gray-900: #111827;
+      --radius: 14px;
+    }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 60%, #fefce8 100%);
+      min-height: 100vh;
+      color: var(--gray-900);
+    }
+    /* NAVBAR */
+    .navbar {
+      background: var(--green-dark);
+      padding: 0 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 64px;
+      box-shadow: 0 2px 12px rgba(6,78,59,.25);
+    }
+    .brand { display: flex; align-items: center; gap: .6rem; text-decoration: none; color: #fff; }
+    .brand span { font-size: 1.2rem; font-weight: 700; }
+    .nav-links { display: flex; gap: .5rem; }
+    .nav-links a {
+      color: rgba(255,255,255,.75);
+      text-decoration: none;
+      padding: .45rem 1rem;
+      border-radius: 8px;
+      font-size: .9rem;
+      font-weight: 500;
+      transition: background .2s, color .2s;
+    }
+    .nav-links a:hover, .nav-links a.active { background: rgba(255,255,255,.12); color: #fff; }
+    /* HERO */
+    .hero { text-align: center; padding: 3.5rem 1.5rem 2rem; }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: .4rem;
+      background: var(--green-light); color: var(--green-dark);
+      padding: .35rem 1rem; border-radius: 999px;
+      font-size: .8rem; font-weight: 600; margin-bottom: 1.2rem;
+    }
+    .hero h1 { font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 800; color: var(--green-dark); line-height: 1.2; margin-bottom: .8rem; }
+    .hero h1 span { color: var(--green-accent); }
+    .hero p { color: var(--gray-500); font-size: 1rem; max-width: 500px; margin: 0 auto 2rem; line-height: 1.7; }
+    /* CARD */
+    .card {
+      background: var(--white);
+      border-radius: var(--radius);
+      box-shadow: 0 12px 40px rgba(0,0,0,.12);
+      padding: 2.5rem;
+      max-width: 500px;
+      margin: 0 auto 4rem;
+      border: 1px solid var(--gray-100);
+    }
+    .card-header { margin-bottom: 1.8rem; }
+    .card-header h2 { font-size: 1.3rem; font-weight: 700; display: flex; align-items: center; gap: .5rem; }
+    .card-header p { color: var(--gray-500); font-size: .88rem; margin-top: .4rem; }
+    /* FORM */
+    .form-group { margin-bottom: 1.3rem; }
+    label { display: block; font-size: .85rem; font-weight: 600; color: var(--gray-700); margin-bottom: .45rem; }
+    label .req { color: var(--green-accent); }
+    input[type="text"] {
+      width: 100%; padding: .75rem 1rem;
+      border: 1.5px solid var(--gray-200); border-radius: 10px;
+      font-size: .95rem; font-family: inherit; color: var(--gray-900);
+      background: var(--gray-50); transition: border-color .2s, box-shadow .2s;
+      outline: none;
+    }
+    input[type="text"]:focus { border-color: var(--green-accent); background: #fff; box-shadow: 0 0 0 3px rgba(16,185,129,.15); }
+    .input-hint { font-size: .78rem; color: var(--gray-500); margin-top: .3rem; }
+
+    /* GPS DETECT BUTTON */
+    .location-field-wrap { position: relative; }
+    .detect-btn {
+      display: flex; align-items: center; gap: .6rem;
+      margin-top: .5rem;
+      background: #fff;
+      border: 1.5px solid var(--gray-200);
+      border-radius: 10px;
+      padding: .65rem 1rem;
+      width: 100%;
+      cursor: pointer;
+      transition: border-color .2s, box-shadow .2s, background .2s;
+      text-align: left;
+    }
+    .detect-btn:hover {
+      border-color: #f87171;
+      background: #fff5f5;
+      box-shadow: 0 2px 10px rgba(239,68,68,.12);
+    }
+    .detect-btn:active { transform: scale(.99); }
+    .detect-btn .pin-icon {
+      font-size: 1.1rem;
+      color: #ef4444;
+      flex-shrink: 0;
+    }
+    .detect-btn .detect-text { flex: 1; }
+    .detect-btn .detect-text .dt-main {
+      display: block;
+      font-size: .88rem; font-weight: 700;
+      color: #ef4444;
+    }
+    .detect-btn .detect-text .dt-sub {
+      display: block;
+      font-size: .75rem; color: var(--gray-500);
+      margin-top: .05rem;
+    }
+    .detect-btn .spin {
+      display: none;
+      width: 16px; height: 16px;
+      border: 2px solid #fca5a5;
+      border-top-color: #ef4444;
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+    }
+    .detect-btn.loading .spin { display: block; }
+    .detect-btn.loading .pin-icon { display: none; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* geo-error toast */
+    .geo-toast {
+      display: none;
+      margin-top: .5rem;
+      background: #fee2e2; color: #991b1b;
+      border: 1px solid #fca5a5;
+      border-radius: 8px; padding: .5rem .8rem;
+      font-size: .8rem; font-weight: 500;
+    }
+    .geo-toast.show { display: block; }
+    /* BUTTON */
+    .btn-submit {
+      width: 100%; padding: .9rem;
+      background: linear-gradient(135deg, var(--green-accent) 0%, #059669 100%);
+      color: #fff; font-size: 1rem; font-weight: 700;
+      border: none; border-radius: 10px; cursor: pointer;
+      margin-top: .5rem; display: flex; align-items: center; justify-content: center; gap: .5rem;
+      transition: opacity .2s, transform .15s, box-shadow .2s;
+      box-shadow: 0 4px 14px rgba(16,185,129,.35);
+    }
+    .btn-submit:hover { opacity: .92; transform: translateY(-1px); box-shadow: 0 6px 20px rgba(16,185,129,.45); }
+    .btn-submit:active { transform: translateY(0); }
+    /* ALERT */
+    .alert { padding: .85rem 1.1rem; border-radius: 10px; font-size: .88rem; font-weight: 500; margin-bottom: 1.4rem; }
+    .alert-error { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+    /* VIEW LINK */
+    .view-link { text-align: center; margin-top: 1.3rem; }
+    .view-link a { color: var(--green-accent); font-weight: 600; font-size: .9rem; text-decoration: none; }
+    .view-link a:hover { text-decoration: underline; }
+    /* ACTION BUTTONS */
+    .action-buttons {
+      position: absolute;
+      top: 84px;
+      left: 2rem;
+      z-index: 10;
+      display: flex;
+      gap: 0.8rem;
+    }
+    .btn-circle {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 44px; height: 44px;
+      background: var(--white);
+      border: none;
+      color: var(--green-dark);
+      font-size: 1.3rem;
+      border-radius: 50%;
+      text-decoration: none;
+      box-shadow: 0 2px 8px rgba(0,0,0,.1);
+      cursor: pointer;
+      transition: background .2s, transform .15s, box-shadow .2s;
+    }
+    .btn-circle:hover {
+      background: var(--green-light);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,.15);
+    }
+    .btn-circle:active { transform: translateY(0); }
+    /* HOW IT WORKS */
+    .hiw { max-width: 840px; margin: 0 auto 5rem; padding: 0 1.5rem; text-align: center; }
+    .hiw h2 { font-size: 1.4rem; font-weight: 700; color: var(--green-dark); margin-bottom: 2rem; }
+    .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 1.4rem; }
+    .step {
+      background: #fff; border-radius: var(--radius); padding: 1.8rem 1.4rem;
+      box-shadow: 0 1px 6px rgba(0,0,0,.07); border: 1px solid var(--gray-100);
+      transition: transform .2s, box-shadow .2s;
+    }
+    .step:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0,0,0,.1); }
+    .step-num {
+      width: 40px; height: 40px; background: var(--green-light); color: var(--green-dark);
+      border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
+      font-weight: 800; margin-bottom: .9rem;
+    }
+    .step h3 { font-size: .97rem; font-weight: 700; margin-bottom: .35rem; }
+    .step p  { font-size: .83rem; color: var(--gray-500); line-height: 1.6; }
+    /* FOOTER */
+    footer { background: var(--green-dark); color: rgba(255,255,255,.65); text-align: center; padding: 1.4rem; font-size: .85rem; }
+    footer strong { color: #fff; }
+  </style>
+</head>
+<body>
+
+  <nav class="navbar">
+    <a href="/" class="brand">
+      <span>🥗 FoodLink Rescue</span>
+    </a>
+    <div class="nav-links">
+      <a href="/" class="active">Donate</a>
+      <a href="/view">View Listings</a>
+    </div>
+  </nav>
+
+  <!-- ACTION BUTTONS -->
+  <div class="action-buttons">
+    <button class="btn-circle" id="backBtn" onclick="history.back()" aria-label="Go Back" title="Go Back">
+      &#8592;
+    </button>
+    <a href="/" class="btn-circle" aria-label="Home" title="Home">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+      </svg>
+    </a>
+  </div>
+
+  <section class="hero">
+    <div class="hero-badge">🌱 Fighting Food Waste Together</div>
+    <h1>Rescue Surplus Food,<br /><span>Feed the Community</span></h1>
+    <p>Restaurants list surplus food for free. Local NGOs and volunteers pick it up so nothing goes to waste.</p>
+  </section>
+
+  <div class="card">
+    <div class="card-header">
+      <h2>📦 Submit a Food Donation</h2>
+      <p>Fill in the details below — your listing appears instantly.</p>
+    </div>
+
+    {% if error %}
+    <div class="alert alert-error">⚠️ {{ error }}</div>
+    {% endif %}
+
+    <form action="/submit" method="POST" id="donationForm">
+      <div class="form-group">
+        <label for="food_name">Food Name <span class="req">*</span></label>
+        <input type="text" id="food_name" name="food_name"
+               placeholder="e.g. Cooked Biryani, Bread Loaves, Fresh Vegetables"
+               maxlength="120" required />
+        <p class="input-hint">Describe the food as clearly as possible.</p>
+      </div>
+      <div class="form-group">
+        <label for="quantity">Quantity <span class="req">*</span></label>
+        <input type="text" id="quantity" name="quantity"
+               placeholder="e.g. 20 portions, 5 kg, 30 packets"
+               maxlength="60" required />
+        <p class="input-hint">Include units so NGOs know how much to expect.</p>
+      </div>
+      <div class="form-group">
+        <label for="location">Pickup Location <span class="req">*</span></label>
+        <div class="location-field-wrap">
+          <input type="text" id="location" name="location"
+                 placeholder="e.g. 12 MG Road, Bengaluru, Karnataka"
+                 maxlength="200" required />
+
+          <!-- GPS Detect Button – matches reference image design -->
+          <button type="button" class="detect-btn" id="detectLocationBtn"
+                  onclick="detectLocation()" title="Detect my current location">
+            <span class="pin-icon">&#128247;</span>
+            <span class="spin"></span>
+            <span class="detect-text">
+              <span class="dt-main">Detect current location</span>
+              <span class="dt-sub">Using GPS</span>
+            </span>
+          </button>
+
+          <!-- Error message shown if geolocation fails -->
+          <div class="geo-toast" id="geoToast"></div>
+        </div>
+        <p class="input-hint">Street address or landmark, or use GPS to auto-fill.</p>
+      </div>
+      <button type="submit" class="btn-submit" id="submitBtn">
+        🚀 Submit Donation
+      </button>
+    </form>
+
+    <div class="view-link">
+      <a href="/view">View all available listings →</a>
+    </div>
+  </div>
+
+  <section class="hiw">
+    <h2>How FoodLink Rescue Works</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <h3>Restaurant Lists Food</h3>
+        <p>Any restaurant or food business submits their surplus food via the simple form above.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <h3>NGO Browses Listings</h3>
+        <p>Registered NGOs and volunteers browse the live listings page to find available donations nearby.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <h3>Food Gets Collected</h3>
+        <p>The NGO travels to the pickup location, collects the food, and marks the listing as claimed.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>Made with ❤️ by <strong>FoodLink Rescue</strong> — Together we can end food waste.</p>
+  </footer>
+
+  <script>
+    /* Disable submit button while submitting */
+    document.getElementById("donationForm").addEventListener("submit", function () {
+      const btn = document.getElementById("submitBtn");
+      btn.textContent = "Submitting...";
+      btn.disabled = true;
+    });
+
+    /* ============================================================
+       GPS LOCATION DETECTION
+       Uses browser Geolocation API + OpenStreetMap Nominatim
+       for free reverse-geocoding (no API key required).
+       ============================================================ */
+    function detectLocation() {
+      const btn   = document.getElementById('detectLocationBtn');
+      const input = document.getElementById('location');
+      const toast = document.getElementById('geoToast');
+
+      // Hide any previous error
+      toast.classList.remove('show');
+      toast.textContent = '';
+
+      // Check if browser supports geolocation
+      if (!navigator.geolocation) {
+        showGeoError('Your browser does not support GPS location.');
+        return;
+      }
+
+      // Show loading state on the button
+      btn.classList.add('loading');
+      btn.querySelector('.dt-main').textContent = 'Detecting location...';
+      btn.querySelector('.dt-sub').textContent  = 'Please allow access if prompted';
+      btn.disabled = true;
+
+      navigator.geolocation.getCurrentPosition(
+        function(position) {
+          const lat = position.coords.latitude;
+          const lon = position.coords.longitude;
+
+          // Reverse-geocode using OpenStreetMap Nominatim (free, no key needed)
+          fetch('https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=' + lat + '&lon=' + lon)
+            .then(res => res.json())
+            .then(data => {
+              // Build a clean, human-readable address
+              const a = data.address || {};
+              const parts = [
+                a.road || a.pedestrian || a.footway || '',
+                a.suburb || a.neighbourhood || a.quarter || '',
+                a.city || a.town || a.village || a.county || '',
+                a.state || '',
+              ].filter(Boolean);
+              const address = parts.join(', ') || data.display_name || '';
+              input.value = address;
+              input.focus();
+              resetDetectBtn();
+            })
+            .catch(() => {
+              // Network error — fall back to raw coordinates
+              input.value = lat.toFixed(5) + ', ' + lon.toFixed(5);
+              resetDetectBtn();
+            });
+        },
+        function(err) {
+          resetDetectBtn();
+          // err.code: 1=denied, 2=unavailable, 3=timeout
+          const messages = {
+            1: 'Location access was denied. Please allow it in your browser settings.',
+            2: 'Location information is currently unavailable.',
+            3: 'The location request timed out. Please try again.',
+          };
+          showGeoError(messages[err.code] || 'Could not detect location.');
+        },
+        { timeout: 10000, maximumAge: 60000 }
+      );
+    }
+
+    function resetDetectBtn() {
+      const btn = document.getElementById('detectLocationBtn');
+      btn.classList.remove('loading');
+      btn.querySelector('.dt-main').textContent = 'Detect current location';
+      btn.querySelector('.dt-sub').textContent  = 'Using GPS';
+      btn.disabled = false;
+    }
+
+    function showGeoError(msg) {
+      const toast = document.getElementById('geoToast');
+      toast.textContent = msg;
+      toast.classList.add('show');
+    }
+  </script>
+</body>
+</html>

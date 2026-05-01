@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FoodLink Rescue – Available Listings</title>
+  <meta name="description" content="Browse all available surplus food donations near you on FoodLink Rescue." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --green-dark:   #064e3b;
+      --green-accent: #10b981;
+      --green-light:  #d1fae5;
+      --amber:        #f59e0b;
+      --amber-light:  #fef3c7;
+      --red:          #ef4444;
+      --white:        #ffffff;
+      --gray-50:      #f9fafb;
+      --gray-100:     #f3f4f6;
+      --gray-200:     #e5e7eb;
+      --gray-500:     #6b7280;
+      --gray-700:     #374151;
+      --gray-900:     #111827;
+      --radius:       14px;
+    }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 60%, #fefce8 100%);
+      min-height: 100vh;
+      color: var(--gray-900);
+    }
+
+    /* ── NAVBAR ── */
+    .navbar {
+      background: var(--green-dark);
+      padding: 0 2rem;
+      display: flex; align-items: center; justify-content: space-between;
+      height: 64px;
+      box-shadow: 0 2px 12px rgba(6,78,59,.25);
+    }
+    .brand { display: flex; align-items: center; gap: .6rem; text-decoration: none; color: #fff; }
+    .brand span { font-size: 1.2rem; font-weight: 700; }
+    .nav-links { display: flex; gap: .5rem; }
+    .nav-links a {
+      color: rgba(255,255,255,.75); text-decoration: none;
+      padding: .45rem 1rem; border-radius: 8px; font-size: .9rem; font-weight: 500;
+      transition: background .2s, color .2s;
+    }
+    .nav-links a:hover, .nav-links a.active { background: rgba(255,255,255,.12); color: #fff; }
+
+    /* ── PAGE HEADER ── */
+    .page-header {
+      max-width: 1000px; margin: 0 auto;
+      padding: 4.5rem 1.5rem 1.5rem;
+      display: flex; align-items: flex-end; justify-content: space-between;
+      flex-wrap: wrap; gap: 1rem;
+    }
+    .page-header h1 { font-size: clamp(1.6rem, 3vw, 2.2rem); font-weight: 800; color: var(--green-dark); }
+    .page-header p  { color: var(--gray-500); font-size: .9rem; margin-top: .3rem; }
+    .btn-donate {
+      display: inline-flex; align-items: center; gap: .4rem;
+      background: linear-gradient(135deg, var(--green-accent) 0%, #059669 100%);
+      color: #fff; font-weight: 700; font-size: .9rem;
+      padding: .65rem 1.4rem; border-radius: 10px; text-decoration: none;
+      box-shadow: 0 4px 14px rgba(16,185,129,.3);
+      transition: opacity .2s, transform .15s;
+    }
+    .btn-donate:hover { opacity: .9; transform: translateY(-1px); }
+
+    /* ── ACTION BUTTONS ── */
+    .action-buttons {
+      position: absolute;
+      top: 84px;
+      left: 2rem;
+      z-index: 10;
+      display: flex;
+      gap: 0.8rem;
+    }
+    .btn-circle {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 44px; height: 44px;
+      background: var(--white);
+      border: none;
+      color: var(--green-dark);
+      font-size: 1.3rem;
+      border-radius: 50%;
+      text-decoration: none;
+      box-shadow: 0 2px 8px rgba(0,0,0,.1);
+      cursor: pointer;
+      transition: background .2s, transform .15s, box-shadow .2s;
+    }
+    .btn-circle:hover {
+      background: var(--green-light);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,.15);
+    }
+    .btn-circle:active { transform: translateY(0); }
+
+    /* ── STATS BAR ── */
+    .stats-bar {
+      max-width: 1000px; margin: 0 auto 1.5rem; padding: 0 1.5rem;
+      display: flex; gap: 1rem; flex-wrap: wrap;
+    }
+    .stat-chip {
+      background: #fff; border: 1px solid var(--gray-100);
+      border-radius: 10px; padding: .6rem 1.2rem;
+      display: flex; align-items: center; gap: .5rem;
+      font-size: .85rem; font-weight: 600; color: var(--gray-700);
+      box-shadow: 0 1px 4px rgba(0,0,0,.06);
+    }
+    .stat-chip .chip-val { color: var(--green-accent); font-size: 1.1rem; font-weight: 800; }
+
+    /* ── TABLE WRAPPER ── */
+    .table-wrap {
+      max-width: 1000px; margin: 0 auto 5rem; padding: 0 1.5rem;
+    }
+    .table-card {
+      background: #fff; border-radius: var(--radius);
+      box-shadow: 0 8px 32px rgba(0,0,0,.10); overflow: hidden;
+      border: 1px solid var(--gray-100);
+    }
+    table { width: 100%; border-collapse: collapse; }
+    thead { background: var(--green-dark); }
+    thead th {
+      padding: 1rem 1.2rem; text-align: left;
+      color: rgba(255,255,255,.85); font-size: .82rem;
+      font-weight: 600; letter-spacing: .5px; text-transform: uppercase;
+    }
+    tbody tr { border-bottom: 1px solid var(--gray-100); transition: background .15s; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: var(--gray-50); }
+    tbody td { padding: 1rem 1.2rem; font-size: .9rem; vertical-align: middle; }
+    .food-name { font-weight: 700; color: var(--gray-900); }
+    .qty-badge {
+      display: inline-block;
+      background: var(--amber-light); color: #92400e;
+      padding: .25rem .7rem; border-radius: 999px;
+      font-size: .78rem; font-weight: 600;
+    }
+    .location-cell { color: var(--gray-700); }
+    .location-cell span { display: inline-flex; align-items: center; gap: .3rem; }
+    .date-cell { color: var(--gray-500); font-size: .82rem; }
+
+    /* ── DELETE BUTTON ── */
+    .btn-delete {
+      display: inline-flex; align-items: center; gap: .4rem;
+      background: #fff0f0; border: 1.5px solid #fca5a5;
+      color: var(--red); padding: .38rem 1rem;
+      border-radius: 8px; font-size: .82rem; font-weight: 700;
+      cursor: pointer; transition: background .2s, border-color .2s, transform .15s, box-shadow .2s;
+      white-space: nowrap;
+    }
+    .btn-delete:hover {
+      background: #fee2e2; border-color: var(--red);
+      transform: translateY(-1px);
+      box-shadow: 0 3px 10px rgba(239,68,68,.25);
+    }
+    .btn-delete:active { transform: translateY(0); }
+    .btn-delete .del-icon { font-size: .9rem; }
+
+    /* ── MODAL OVERLAY ── */
+    .modal-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0,0,0,.45);
+      backdrop-filter: blur(3px);
+      z-index: 100;
+      align-items: center; justify-content: center;
+    }
+    .modal-overlay.show { display: flex; animation: fadeIn .18s ease; }
+    @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+
+    .modal-box {
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 20px 60px rgba(0,0,0,.22);
+      padding: 2rem 2rem 1.6rem;
+      max-width: 380px; width: 90%;
+      text-align: center;
+      animation: slideUp .2s ease;
+    }
+    @keyframes slideUp { from { transform: translateY(20px); opacity:0; } to { transform: translateY(0); opacity:1; } }
+
+    .modal-icon { font-size: 2.8rem; margin-bottom: .8rem; }
+    .modal-box h3 { font-size: 1.15rem; font-weight: 800; color: var(--gray-900); margin-bottom: .5rem; }
+    .modal-box p  { font-size: .88rem; color: var(--gray-500); line-height: 1.6; margin-bottom: 1.5rem; }
+    .modal-box .food-highlight {
+      display: inline-block;
+      background: #fff0f0; color: #991b1b;
+      border-radius: 6px; padding: .15rem .5rem;
+      font-weight: 700;
+    }
+    .modal-actions { display: flex; gap: .75rem; justify-content: center; }
+    .modal-cancel {
+      flex: 1; padding: .65rem 1rem;
+      background: var(--gray-100); border: none; border-radius: 10px;
+      font-size: .9rem; font-weight: 600; color: var(--gray-700);
+      cursor: pointer; transition: background .2s;
+    }
+    .modal-cancel:hover { background: var(--gray-200); }
+    .modal-confirm {
+      flex: 1; padding: .65rem 1rem;
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+      border: none; border-radius: 10px;
+      font-size: .9rem; font-weight: 700; color: #fff;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(239,68,68,.3);
+      transition: opacity .2s, transform .15s;
+    }
+    .modal-confirm:hover { opacity: .9; transform: translateY(-1px); }
+
+    /* ── SEARCH BAR ── */
+    .search-wrap {
+      max-width: 1000px; margin: 0 auto 1.2rem; padding: 0 1.5rem;
+    }
+    .search-box {
+      display: flex; align-items: center; gap: .6rem;
+      background: #fff;
+      border: 1.5px solid var(--gray-200);
+      border-radius: 12px;
+      padding: .55rem .55rem .55rem 1rem;
+      box-shadow: 0 2px 10px rgba(0,0,0,.07);
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .search-box:focus-within {
+      border-color: var(--green-accent);
+      box-shadow: 0 0 0 3px rgba(16,185,129,.14), 0 2px 10px rgba(0,0,0,.07);
+    }
+    .search-icon { font-size: 1.05rem; color: var(--gray-500); flex-shrink: 0; }
+    #locationSearch {
+      flex: 1; border: none; outline: none;
+      font-size: .95rem; font-family: inherit; color: var(--gray-900);
+      background: transparent;
+    }
+    #locationSearch::placeholder { color: var(--gray-500); }
+    .search-clear {
+      background: var(--gray-100); border: none;
+      color: var(--gray-500); font-size: .8rem; font-weight: 700;
+      padding: .3rem .7rem; border-radius: 8px; cursor: pointer;
+      display: none; transition: background .2s;
+    }
+    .search-clear.visible { display: block; }
+    .search-clear:hover { background: var(--gray-200); }
+    .search-result-label {
+      font-size: .82rem; color: var(--gray-500); margin-top: .5rem;
+      padding-left: .2rem;
+      min-height: 1.2em;
+    }
+    .search-result-label strong { color: var(--green-accent); }
+
+    /* no-results row */
+    #noResultsRow { display: none; }
+    #noResultsRow td {
+      text-align: center; padding: 3rem 1rem;
+      color: var(--gray-500); font-size: .9rem;
+    }
+    #noResultsRow .nr-icon { font-size: 2rem; display: block; margin-bottom: .5rem; }
+
+    /* ── EMPTY STATE ── */
+    .empty-state {
+      text-align: center; padding: 4rem 2rem;
+    }
+    .empty-state .empty-icon { font-size: 3.5rem; margin-bottom: 1rem; }
+    .empty-state h3 { font-size: 1.2rem; font-weight: 700; color: var(--gray-700); margin-bottom: .5rem; }
+    .empty-state p  { color: var(--gray-500); font-size: .9rem; margin-bottom: 1.5rem; }
+    .empty-state a {
+      display: inline-block;
+      background: linear-gradient(135deg, var(--green-accent) 0%, #059669 100%);
+      color: #fff; font-weight: 700; padding: .7rem 1.6rem;
+      border-radius: 10px; text-decoration: none;
+      box-shadow: 0 4px 14px rgba(16,185,129,.3);
+    }
+
+    /* ── FOOTER ── */
+    footer { background: var(--green-dark); color: rgba(255,255,255,.65); text-align: center; padding: 1.4rem; font-size: .85rem; }
+    footer strong { color: #fff; }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 640px) {
+      thead th:nth-child(4), tbody td:nth-child(4) { display: none; }
+      .page-header { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <a href="/" class="brand">
+      <span>🥗 FoodLink Rescue</span>
+    </a>
+    <div class="nav-links">
+      <a href="/">Donate</a>
+      <a href="/view" class="active">View Listings</a>
+    </div>
+  </nav>
+
+  <!-- ACTION BUTTONS -->
+  <div class="action-buttons">
+    <button class="btn-circle" id="backBtn" onclick="history.back()" aria-label="Go Back" title="Go Back">
+      &#8592;
+    </button>
+    <a href="/" class="btn-circle" aria-label="Home" title="Home">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+      </svg>
+    </a>
+  </div>
+
+  <!-- PAGE HEADER -->
+  <div class="page-header">
+    <div>
+      <h1>🗺️ Available Food Listings</h1>
+      <p>Real-time surplus food donations waiting to be collected.</p>
+    </div>
+    <a href="/" class="btn-donate">+ Add Donation</a>
+  </div>
+
+  <!-- STATS BAR -->
+  <div class="stats-bar">
+    <div class="stat-chip">
+      <span class="chip-val">{{ listings | length }}</span>
+      Active Listing{{ 's' if listings | length != 1 else '' }}
+    </div>
+    <div class="stat-chip">
+      🕐 Updated Live
+    </div>
+    <div class="stat-chip">
+      🌍 All Locations
+    </div>
+  </div>
+
+  <!-- LOCATION SEARCH BAR -->
+  <div class="search-wrap" id="searchSection">
+    <div class="search-box">
+      <span class="search-icon">📍</span>
+      <input
+        type="text"
+        id="locationSearch"
+        placeholder="Search by location (e.g. Bengaluru, MG Road)…"
+        aria-label="Filter listings by location"
+        autocomplete="off"
+      />
+      <button class="search-clear" id="searchClearBtn" onclick="clearSearch()" title="Clear search">✕ Clear</button>
+    </div>
+    <p class="search-result-label" id="searchResultLabel"></p>
+  </div>
+
+  <!-- TABLE / EMPTY STATE -->
+  <div class="table-wrap">
+    <div class="table-card">
+
+      {% if listings %}
+      <table id="listingsTable">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Food Item</th>
+            <th>Quantity</th>
+            <th>Pickup Location</th>
+            <th>Submitted At</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in listings %}
+          <tr>
+            <!-- Serial number (listings are newest-first, so we count down) -->
+            <td style="color: var(--gray-500); font-weight: 600;">{{ loop.index }}</td>
+
+            <!-- Food name -->
+            <td class="food-name">{{ item['food_name'] }}</td>
+
+            <!-- Quantity badge -->
+            <td><span class="qty-badge">{{ item['quantity'] }}</span></td>
+
+            <!-- Location -->
+            <td class="location-cell">
+              <span>📍 {{ item['location'] }}</span>
+            </td>
+
+            <!-- Date submitted -->
+            <td class="date-cell">{{ item['submitted_at'] }}</td>
+
+            <!-- Delete button – triggers custom confirmation modal -->
+            <td>
+              <button
+                class="btn-delete"
+                id="delete-btn-{{ item['id'] }}"
+                data-id="{{ item['id'] }}"
+                data-name="{{ item['food_name'] | e }}"
+                type="button"
+              >
+                <span class="del-icon">&#128465;</span> Delete
+              </button>
+
+              <!-- Hidden form; submitted programmatically after confirmation -->
+              <form id="delete-form-{{ item['id'] }}"
+                    action="/delete/{{ item['id'] }}"
+                    method="POST"
+                    style="display:none;">
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+          <!-- Shown by JS when search has no matches -->
+          <tr id="noResultsRow">
+            <td colspan="6">
+              <span class="nr-icon">🔍</span>
+              No listings found for that location. Try a different keyword.
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      {% else %}
+      <!-- Empty state – no listings yet -->
+      <div class="empty-state">
+        <div class="empty-icon">🍽️</div>
+        <h3>No listings yet</h3>
+        <p>Be the first to donate surplus food and make a difference!</p>
+        <a href="/">+ Submit a Donation</a>
+      </div>
+      {% endif %}
+
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <p>Made with ❤️ by <strong>FoodLink Rescue</strong> — Together we can end food waste.</p>
+  </footer>
+
+  <!-- ── CUSTOM DELETE CONFIRMATION MODAL ── -->
+  <div class="modal-overlay" id="deleteModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-box">
+      <div class="modal-icon">🗑️</div>
+      <h3 id="modalTitle">Delete this listing?</h3>
+      <p>
+        You are about to permanently remove
+        <span class="food-highlight" id="modalFoodName"></span>.
+        <br />This action cannot be undone.
+      </p>
+      <div class="modal-actions">
+        <button class="modal-cancel" id="modalCancelBtn" onclick="closeDeleteModal()">Cancel</button>
+        <button class="modal-confirm" id="modalConfirmBtn" onclick="confirmDelete()">Yes, Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /* ============================================================
+       LOCATION SEARCH - filters table rows as the user types
+       ============================================================ */
+    var searchInput  = document.getElementById('locationSearch');
+    var clearBtn     = document.getElementById('searchClearBtn');
+    var resultLabel  = document.getElementById('searchResultLabel');
+    var noResultsRow = document.getElementById('noResultsRow');
+
+    function getDataRows() {
+      var all = document.querySelectorAll('#listingsTable tbody tr');
+      return Array.prototype.filter.call(all, function(r) {
+        return r.id !== 'noResultsRow';
+      });
+    }
+
+    if (searchInput) {
+      searchInput.addEventListener('input', filterByLocation);
+    }
+
+    function filterByLocation() {
+      var query = searchInput.value.trim().toLowerCase();
+
+      /* show/hide clear button */
+      if (query.length > 0) {
+        clearBtn.classList.add('visible');
+      } else {
+        clearBtn.classList.remove('visible');
+      }
+
+      var rows = getDataRows();
+      var visibleCount = 0;
+
+      rows.forEach(function(row) {
+        /* location is the 4th td (index 3) */
+        var cells   = row.querySelectorAll('td');
+        var locText = cells[3] ? cells[3].textContent.toLowerCase() : '';
+        var match   = !query || locText.indexOf(query) !== -1;
+        row.style.display = match ? '' : 'none';
+        if (match) visibleCount++;
+      });
+
+      /* no-results row */
+      if (noResultsRow) {
+        noResultsRow.style.display = (query && visibleCount === 0) ? '' : 'none';
+      }
+
+      /* result label */
+      if (!query) {
+        resultLabel.innerHTML = '';
+      } else if (visibleCount === 0) {
+        resultLabel.innerHTML = 'No listings match <strong>"' + escHtml(searchInput.value) + '"</strong>.';
+      } else {
+        resultLabel.innerHTML =
+          '<strong>' + visibleCount + '</strong> listing' +
+          (visibleCount !== 1 ? 's' : '') +
+          ' found for <strong>"' + escHtml(searchInput.value) + '"</strong>.';
+      }
+    }
+
+    function clearSearch() {
+      searchInput.value = '';
+      filterByLocation();
+      searchInput.focus();
+    }
+
+    function escHtml(str) {
+      return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    /* ============================================================
+       DELETE MODAL
+       - Uses data-id and data-name attributes on each button
+       - No Jinja2 expressions inside JS, so no linter errors
+       ============================================================ */
+    var pendingDeleteId = null;
+
+    /* Single delegated click listener for all delete buttons */
+    document.addEventListener('click', function(e) {
+      var btn = e.target.closest('.btn-delete');
+      if (btn) {
+        openDeleteModal(btn.dataset.id, btn.dataset.name);
+      }
+    });
+
+    function openDeleteModal(id, foodName) {
+      pendingDeleteId = id;
+      document.getElementById('modalFoodName').textContent = foodName;
+      document.getElementById('deleteModal').classList.add('show');
+      setTimeout(function() {
+        document.getElementById('modalCancelBtn').focus();
+      }, 50);
+    }
+
+    function closeDeleteModal() {
+      document.getElementById('deleteModal').classList.remove('show');
+      pendingDeleteId = null;
+    }
+
+    function confirmDelete() {
+      if (!pendingDeleteId) return;
+      var btn = document.getElementById('modalConfirmBtn');
+      btn.textContent = 'Deleting...';
+      btn.disabled = true;
+      document.getElementById('delete-form-' + pendingDeleteId).submit();
+    }
+
+    document.getElementById('deleteModal').addEventListener('click', function(e) {
+      if (e.target === this) closeDeleteModal();
+    });
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') closeDeleteModal();
+    });
+  </script>
+
+</body>
+</html>
