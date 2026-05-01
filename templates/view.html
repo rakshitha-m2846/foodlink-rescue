@@ -292,8 +292,17 @@
       <span>🥗 FoodLink Rescue</span>
     </a>
     <div class="nav-links">
+      {% if session.get('role') != 'ngo' %}
       <a href="/">Donate</a>
+      {% endif %}
       <a href="/view" class="active">View Listings</a>
+      
+      {% if session.get('role') %}
+      <div style="background: rgba(255,255,255,.2); padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.85rem; color: #fff; margin-left: 1rem; display: flex; align-items: center; gap: 0.5rem;">
+        <span>Logged in as: <strong>{{ session.get('role') | title }}</strong></span>
+        <a href="/set_role/clear" style="text-decoration: underline; font-size: 0.8rem; margin: 0; padding: 0; opacity: 0.8;">Change Role</a>
+      </div>
+      {% endif %}
     </div>
   </nav>
 
@@ -302,7 +311,7 @@
     <button class="btn-circle" id="backBtn" onclick="history.back()" aria-label="Go Back" title="Go Back">
       &#8592;
     </button>
-    <a href="/" class="btn-circle" aria-label="Home" title="Home">
+    <a href="/set_role/clear" class="btn-circle" aria-label="Home" title="Home">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
         <polyline points="9 22 9 12 15 12 15 22"></polyline>
@@ -316,7 +325,9 @@
       <h1>🗺️ Available Food Listings</h1>
       <p>Real-time surplus food donations waiting to be collected.</p>
     </div>
+    {% if session.get('role') != 'ngo' %}
     <a href="/" class="btn-donate">+ Add Donation</a>
+    {% endif %}
   </div>
 
   <!-- STATS BAR -->

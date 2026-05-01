@@ -6,13 +6,14 @@
 # It will start a local server at http://127.0.0.1:5000
 # ============================================================
 
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for, session
 import sqlite3
 import os
 from datetime import datetime
 
 # Initialize the Flask application
 app = Flask(__name__)
+app.secret_key = "foodlink_super_secret_key"
 
 # -----------------------------------------------------------
 # DATABASE CONFIGURATION
@@ -68,8 +69,27 @@ init_db()
 def index():
     """
     Homepage – displays the food donation submission form.
+    Redirects NGOs to the view page automatically.
     """
+    if session.get("role") == "ngo":
+        return redirect(url_for("view"))
     return render_template("index.html")
+
+
+@app.route("/set_role/<role>")
+def set_role(role):
+    """
+    Sets the user's role in the session and redirects accordingly.
+    """
+    if role in ["donor", "ngo"]:
+        session["role"] = role
+    elif role == "clear":
+        session.pop("role", None)
+        return redirect(url_for("index"))
+        
+    if session.get("role") == "ngo":
+        return redirect(url_for("view"))
+    return redirect(url_for("index"))
 
 
 @app.route("/submit", methods=["POST"])
@@ -79,6 +99,10 @@ def submit():
     Reads form data, validates it, stores it in the database,
     then redirects the user to the listings page.
     """
+    # NGOs should not be able to submit donations
+    if session.get("role") == "ngo":
+        return redirect(url_for("view"))
+
     # Read form fields (strip whitespace)
     food_name = request.form.get("food_name", "").strip()
     quantity = request.form.get("quantity", "").strip()
