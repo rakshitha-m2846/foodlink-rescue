@@ -34,24 +34,29 @@ def get_db_connection():
 
 def init_db():
     """
-    Creates the 'food_listings' table if it doesn't already exist.
-    Called once when the app starts up.
+    Creates the database and table if they do not exist.
     """
-    conn = get_db_connection()
-    conn.execute(
-        """
+    if not os.path.exists("foodlink.db"):
+        conn = sqlite3.connect("foodlink.db")
+        cursor = conn.cursor()
+
+        # Used food_listings instead of donations to ensure existing routes don't break
+        cursor.execute("""
         CREATE TABLE IF NOT EXISTS food_listings (
-            id          INTEGER PRIMARY KEY AUTOINCREMENT,
-            food_name   TEXT    NOT NULL,
-            quantity    TEXT    NOT NULL,
-            location    TEXT    NOT NULL,
-            submitted_at TEXT   NOT NULL
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            food_name TEXT,
+            quantity TEXT,
+            location TEXT,
+            submitted_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )
-    """
-    )
-    conn.commit()
-    conn.close()
-    print("[OK] Database initialized successfully.")
+        """)
+
+        conn.commit()
+        conn.close()
+        print("[OK] Database initialized successfully.")
+
+# Call this function when the app starts (essential for Gunicorn deployments)
+init_db()
 
 
 # -----------------------------------------------------------
@@ -137,8 +142,6 @@ def delete(listing_id):
 # -----------------------------------------------------------
 
 if __name__ == "__main__":
-    # Initialize the database (creates table if missing)
-    init_db()
 
     # Run the development server
     # debug=True  → auto-reloads on code changes & shows detailed errors
