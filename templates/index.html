@@ -188,12 +188,69 @@
       cursor: pointer;
       transition: background .2s, transform .15s, box-shadow .2s;
     }
-    .btn-circle:hover {
-      background: var(--green-light);
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0,0,0,.15);
-    }
     .btn-circle:active { transform: translateY(0); }
+
+    /* ── NOTIFICATION SYSTEM ── */
+    .notif-wrap { position: relative; display: flex; align-items: center; margin-left: 1rem; }
+    .bell-icon {
+      font-size: 1.2rem;
+      border: 2px solid black;
+      border-radius: 50%;
+      padding: 8px;
+      cursor: pointer;
+      background: white;
+      transition: background 0.2s;
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+      width: 40px; height: 40px;
+    }
+    .bell-icon:hover { background: #f3f4f6; }
+    .red-dot {
+      position: absolute;
+      top: -2px; right: -2px;
+      font-size: 12px;
+      display: none;
+    }
+    .notif-dropdown {
+      position: absolute;
+      top: 50px; right: 0;
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      width: 320px;
+      display: none;
+      z-index: 100;
+      overflow: hidden;
+    }
+    .notif-dropdown.show { display: block; }
+    .notif-header {
+      padding: 1rem;
+      font-weight: 700;
+      border-bottom: 1px solid #e5e7eb;
+      background: #f9fafb;
+      color: var(--gray-700);
+    }
+    .notif-list { max-height: 300px; overflow-y: auto; }
+    .notif-item {
+      padding: 1rem;
+      border-bottom: 1px solid #e5e7eb;
+      font-size: 0.85rem;
+      color: var(--gray-600);
+    }
+    .notif-item:last-child { border-bottom: none; }
+    
+    @keyframes shake {
+      0% { transform: rotate(0); }
+      25% { transform: rotate(10deg); }
+      50% { transform: rotate(-10deg); }
+      75% { transform: rotate(5deg); }
+      100% { transform: rotate(0); }
+    }
+    .shake { animation: shake 0.5s ease-in-out; }
     /* HOW IT WORKS */
     .hiw { max-width: 840px; margin: 0 auto 5rem; padding: 0 1.5rem; text-align: center; }
     .hiw h2 { font-size: 1.4rem; font-weight: 700; color: var(--green-dark); margin-bottom: 2rem; }
@@ -231,7 +288,22 @@
       {% if session.get('role') %}
       <div style="background: rgba(255,255,255,.2); padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.85rem; color: #fff; margin-left: 1rem; display: flex; align-items: center; gap: 0.5rem;">
         <span>Logged in as: <strong>{{ session.get('role') | title }}</strong></span>
-        <a href="/set_role/clear" style="text-decoration: underline; font-size: 0.8rem; margin: 0; padding: 0; opacity: 0.8;">Change Role</a>
+        <a href="/set_role/clear" style="text-decoration: underline; font-size: 0.8rem; margin: 0; padding: 0; opacity: 0.8; color: #fff;">Change Role</a>
+      </div>
+      <div class="notif-wrap" id="notifWrap">
+        <div class="bell-icon" id="bellBtn">
+          🔔<span class="red-dot" id="redDot">🔴</span>
+        </div>
+        <div class="notif-dropdown" id="notifDropdown">
+          <div class="notif-header">Notifications</div>
+          <div class="notif-list">
+            {% for n in notifications %}
+            <div class="notif-item">{{ n.message }}</div>
+            {% else %}
+            <div class="notif-item" style="text-align:center;">No notifications yet.</div>
+            {% endfor %}
+          </div>
+        </div>
       </div>
       {% endif %}
     </div>
@@ -358,6 +430,40 @@
   </footer>
 
   <script>
+    // Notifications Logic
+    {% if session.get('role') %}
+    const notifications = {{ notifications | tojson }};
+    const notifHash = JSON.stringify(notifications);
+    const lastHash = localStorage.getItem('foodlinkNotifHash');
+
+    const bellBtn = document.getElementById('bellBtn');
+    const redDot = document.getElementById('redDot');
+    const dropdown = document.getElementById('notifDropdown');
+    const notifWrap = document.getElementById('notifWrap');
+
+    // Only alert if there are notifications AND it's a new state
+    if (notifHash !== lastHash && notifications.length > 0) {
+      redDot.style.display = 'block';
+      bellBtn.classList.add('shake');
+    }
+
+    bellBtn.addEventListener('click', (e) => {
+      dropdown.classList.toggle('show');
+      if (redDot.style.display === 'block') {
+        redDot.style.display = 'none';
+        bellBtn.classList.remove('shake');
+        localStorage.setItem('foodlinkNotifHash', notifHash);
+      }
+    });
+
+    // Close when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!notifWrap.contains(e.target)) {
+        dropdown.classList.remove('show');
+      }
+    });
+    {% endif %}
+
     /* Disable submit button while submitting */
     document.getElementById("donationForm").addEventListener("submit", function () {
       const btn = document.getElementById("submitBtn");

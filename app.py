@@ -36,25 +36,32 @@ def get_db_connection():
 def init_db():
     """
     Creates the database and table if they do not exist.
+    Also runs migrations to add the 'status' column if needed.
     """
-    if not os.path.exists("foodlink.db"):
-        conn = sqlite3.connect("foodlink.db")
-        cursor = conn.cursor()
+    conn = sqlite3.connect("foodlink.db")
+    cursor = conn.cursor()
 
-        # Used food_listings instead of donations to ensure existing routes don't break
-        cursor.execute("""
-        CREATE TABLE IF NOT EXISTS food_listings (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            food_name TEXT,
-            quantity TEXT,
-            location TEXT,
-            submitted_at DATETIME DEFAULT CURRENT_TIMESTAMP
-        )
-        """)
+    # Used food_listings instead of donations to ensure existing routes don't break
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS food_listings (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        food_name TEXT,
+        quantity TEXT,
+        location TEXT,
+        submitted_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+    """)
+    
+    # Check if 'status' column exists (Migration)
+    cursor.execute("PRAGMA table_info(food_listings)")
+    columns = [col[1] for col in cursor.fetchall()]
+    if 'status' not in columns:
+        cursor.execute("ALTER TABLE food_listings ADD COLUMN status TEXT DEFAULT 'available'")
+        print("[MIGRATION] Added 'status' column to food_listings table.")
 
-        conn.commit()
-        conn.close()
-        print("[OK] Database initialized successfully.")
+    conn.commit()
+    conn.close()
+    print("[OK] Database verified.")
 
 # Call this function when the app starts (essential for Gunicorn deployments)
 init_db()
@@ -159,6 +166,79 @@ def delete(listing_id):
 
     print(f"[DEL] Listing #{listing_id} deleted (marked as collected).")
     return redirect(url_for("view"))
+
+
+@app.route("/claim/<int:listing_id>", methods=["POST"])
+def claim(listing_id):
+    """
+    Updates status to 'claimed' by an NGO.
+    """
+    if session.get("role") != "ngo":
+        return redirect(url_for("view"))
+    conn = get_db_connection()
+    conn.execute("UPDATE food_listings SET status = 'claimed' WHERE id = ?", (listing_id,))
+    conn.commit()
+    conn.close()
+    return redirect(url_for("view"))
+
+
+@app.route("/pickup/<int:listing_id>", methods=["POST"])
+def pickup(listing_id):
+    """
+    Updates status to 'picked_up' by an NGO.
+    """
+    if session.get("role") != "ngo":
+        return redirect(url_for("view"))
+    conn = get_db_connection()
+    conn.execute("UPDATE food_listings SET status = 'picked_up' WHERE id = ?", (listing_id,))
+    conn.commit()
+    conn.close()
+    return redirect(url_for("view"))
+
+
+@app.context_processor
+def inject_notifications():
+    """
+    Provides real-time notifications to all templates based on the current user's role.
+    """
+    role = session.get('role')
+    if not role:
+        return dict(notifications=[])
+        
+    conn = get_db_connection()
+    try:
+        # Fetch the latest 10 items for notifications
+        recent = conn.execute("SELECT id, food_name, status FROM food_listings ORDER BY id DESC LIMIT 10").fetchall()
+    except sqlite3.OperationalError:
+        recent = []
+    finally:
+        conn.close()
+    
+    notifications = []
+    for item in recent:
+        status = item['status']
+        if role == 'ngo':
+            if status == 'available':
+                msg = f"📢 New food donation available: {item['food_name']}"
+            elif status == 'claimed':
+                msg = f"✅ Donation confirmed: {item['food_name']}"
+            elif status == 'picked_up':
+                msg = f"🎉 Pickup completed: {item['food_name']}"
+        else: # donor
+            if status == 'available':
+                msg = f"📦 Waiting for NGO to accept: {item['food_name']}"
+            elif status == 'claimed':
+                msg = f"✅ NGO accepted your donation: {item['food_name']}"
+            elif status == 'picked_up':
+                msg = f"🎉 Donation completed successfully: {item['food_name']}"
+        
+        notifications.append({
+            'id': item['id'],
+            'status': status,
+            'message': msg
+        })
+    
+    return dict(notifications=notifications)
 
 
 # -----------------------------------------------------------

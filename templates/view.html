@@ -91,12 +91,69 @@
       cursor: pointer;
       transition: background .2s, transform .15s, box-shadow .2s;
     }
-    .btn-circle:hover {
-      background: var(--green-light);
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0,0,0,.15);
-    }
     .btn-circle:active { transform: translateY(0); }
+
+    /* ── NOTIFICATION SYSTEM ── */
+    .notif-wrap { position: relative; display: flex; align-items: center; margin-left: 1rem; }
+    .bell-icon {
+      font-size: 1.2rem;
+      border: 2px solid black;
+      border-radius: 50%;
+      padding: 8px;
+      cursor: pointer;
+      background: white;
+      transition: background 0.2s;
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+      width: 40px; height: 40px;
+    }
+    .bell-icon:hover { background: #f3f4f6; }
+    .red-dot {
+      position: absolute;
+      top: -2px; right: -2px;
+      font-size: 12px;
+      display: none;
+    }
+    .notif-dropdown {
+      position: absolute;
+      top: 50px; right: 0;
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      width: 320px;
+      display: none;
+      z-index: 100;
+      overflow: hidden;
+    }
+    .notif-dropdown.show { display: block; }
+    .notif-header {
+      padding: 1rem;
+      font-weight: 700;
+      border-bottom: 1px solid #e5e7eb;
+      background: #f9fafb;
+      color: var(--gray-700);
+    }
+    .notif-list { max-height: 300px; overflow-y: auto; }
+    .notif-item {
+      padding: 1rem;
+      border-bottom: 1px solid #e5e7eb;
+      font-size: 0.85rem;
+      color: var(--gray-600);
+    }
+    .notif-item:last-child { border-bottom: none; }
+    
+    @keyframes shake {
+      0% { transform: rotate(0); }
+      25% { transform: rotate(10deg); }
+      50% { transform: rotate(-10deg); }
+      75% { transform: rotate(5deg); }
+      100% { transform: rotate(0); }
+    }
+    .shake { animation: shake 0.5s ease-in-out; }
 
     /* ── STATS BAR ── */
     .stats-bar {
@@ -300,7 +357,22 @@
       {% if session.get('role') %}
       <div style="background: rgba(255,255,255,.2); padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.85rem; color: #fff; margin-left: 1rem; display: flex; align-items: center; gap: 0.5rem;">
         <span>Logged in as: <strong>{{ session.get('role') | title }}</strong></span>
-        <a href="/set_role/clear" style="text-decoration: underline; font-size: 0.8rem; margin: 0; padding: 0; opacity: 0.8;">Change Role</a>
+        <a href="/set_role/clear" style="text-decoration: underline; font-size: 0.8rem; margin: 0; padding: 0; opacity: 0.8; color: #fff;">Change Role</a>
+      </div>
+      <div class="notif-wrap" id="notifWrap">
+        <div class="bell-icon" id="bellBtn">
+          🔔<span class="red-dot" id="redDot">🔴</span>
+        </div>
+        <div class="notif-dropdown" id="notifDropdown">
+          <div class="notif-header">Notifications</div>
+          <div class="notif-list">
+            {% for n in notifications %}
+            <div class="notif-item">{{ n.message }}</div>
+            {% else %}
+            <div class="notif-item" style="text-align:center;">No notifications yet.</div>
+            {% endfor %}
+          </div>
+        </div>
       </div>
       {% endif %}
     </div>
@@ -396,24 +468,48 @@
             <!-- Date submitted -->
             <td class="date-cell">{{ item['submitted_at'] }}</td>
 
-            <!-- Delete button – triggers custom confirmation modal -->
+            <!-- Action / Status -->
             <td>
-              <button
-                class="btn-delete"
-                id="delete-btn-{{ item['id'] }}"
-                data-id="{{ item['id'] }}"
-                data-name="{{ item['food_name'] | e }}"
-                type="button"
-              >
-                <span class="del-icon">&#128465;</span> Delete
-              </button>
+              <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+                {% if session.get('role') == 'ngo' %}
+                  {% if item['status'] == 'available' %}
+                    <form action="/claim/{{ item['id'] }}" method="POST" style="margin:0;">
+                      <button type="submit" class="btn-donate" style="padding: 0.4rem 0.8rem; font-size: 0.85rem; margin:0;">Claim</button>
+                    </form>
+                  {% elif item['status'] == 'claimed' %}
+                    <div style="font-size: 0.85rem; color: var(--green-dark);">✅ Donation confirmed. Ready for pickup</div>
+                    <form action="/pickup/{{ item['id'] }}" method="POST" style="margin:0;">
+                      <button type="submit" class="btn-donate" style="padding: 0.4rem 0.8rem; font-size: 0.85rem; margin:0; background: #059669;">Mark as Picked Up</button>
+                    </form>
+                  {% elif item['status'] == 'picked_up' %}
+                    <div style="font-size: 0.85rem; color: var(--green-dark);">🎉 Food successfully collected</div>
+                  {% endif %}
+                {% else %}
+                  <!-- Donor View -->
+                  {% if item['status'] == 'available' %}
+                    <div style="font-size: 0.85rem; color: var(--gray-600);">📦 Waiting for NGO to accept your donation</div>
+                  {% elif item['status'] == 'claimed' %}
+                    <div style="font-size: 0.85rem; color: var(--green-dark);">✅ Your donation has been accepted. Prepare for pickup</div>
+                  {% elif item['status'] == 'picked_up' %}
+                    <div style="font-size: 0.85rem; color: var(--green-dark);">🎉 Your donation was successfully collected</div>
+                  {% endif %}
+                {% endif %}
 
-              <!-- Hidden form; submitted programmatically after confirmation -->
-              <form id="delete-form-{{ item['id'] }}"
-                    action="/delete/{{ item['id'] }}"
-                    method="POST"
-                    style="display:none;">
-              </form>
+                <!-- Delete button -->
+                <button
+                  class="btn-delete"
+                  id="delete-btn-{{ item['id'] }}"
+                  data-id="{{ item['id'] }}"
+                  data-name="{{ item['food_name'] | e }}"
+                  type="button"
+                  style="padding: 0.3rem 0.6rem; font-size: 0.8rem; width: fit-content;"
+                >
+                  <span class="del-icon">&#128465;</span> Delete
+                </button>
+
+                <!-- Hidden form; submitted programmatically after confirmation -->
+                <form id="delete-form-{{ item['id'] }}" action="/delete/{{ item['id'] }}" method="POST" style="display:none;"></form>
+              </div>
             </td>
           </tr>
           {% endfor %}
