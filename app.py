@@ -68,6 +68,19 @@ init_db()
 
 
 # -----------------------------------------------------------
+# TRANSIENT NOTIFICATIONS
+# -----------------------------------------------------------
+app_notifications = []
+
+def add_notification(role, message):
+    app_notifications.append({
+        'id': len(app_notifications) + 5000,
+        'role': role,
+        'status': 'alert',
+        'message': message
+    })
+
+# -----------------------------------------------------------
 # ROUTES
 # -----------------------------------------------------------
 
@@ -209,6 +222,8 @@ def claim(listing_id):
     conn.execute("UPDATE food_listings SET status = 'claimed' WHERE id = ?", (listing_id,))
     conn.commit()
     conn.close()
+    
+    add_notification("donor", "Your donation has been accepted by an NGO")
     return redirect(url_for("view"))
 
 
@@ -223,6 +238,8 @@ def pickup(listing_id):
     conn.execute("UPDATE food_listings SET status = 'picked_up' WHERE id = ?", (listing_id,))
     conn.commit()
     conn.close()
+    
+    add_notification("ngo", "Pickup completed successfully")
     return redirect(url_for("view"))
 
 
@@ -267,6 +284,16 @@ def inject_notifications():
             'status': status,
             'message': msg
         })
+    
+    for item in app_notifications:
+        if item['role'] == role:
+            notifications.append({
+                'id': item['id'],
+                'status': item['status'],
+                'message': item['message']
+            })
+            
+    notifications = sorted(notifications, key=lambda x: x['id'], reverse=True)
     
     highest_id = max([n['id'] for n in notifications]) if notifications else 0
     last_seen = session.get('last_seen_notif_id', 0)
