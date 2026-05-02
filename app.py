@@ -79,7 +79,7 @@ def index():
     Redirects NGOs to the view page automatically.
     """
     if not session.get("role"):
-        return redirect(url_for("login"))
+        return redirect("/login")
     if session.get("role") == "ngo":
         return redirect(url_for("view"))
     return render_template("index.html")
