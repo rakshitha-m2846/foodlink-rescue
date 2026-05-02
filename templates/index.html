@@ -28,48 +28,72 @@
       min-height: 100vh;
       color: var(--gray-900);
     }
-    /* NAVBAR */
+    /* ── MODERN APP-LIKE HEADER ── */
     .navbar {
-      background: var(--green-dark);
-      padding: 0 2rem;
       display: flex;
-      align-items: center;
       justify-content: space-between;
-      height: 64px;
-      box-shadow: 0 2px 12px rgba(6,78,59,.25);
+      align-items: center;
+      padding: 12px 20px;
+      background: white;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      height: auto;
+      position: sticky;
+      top: 0; z-index: 50;
     }
-    .brand { display: flex; align-items: center; gap: .6rem; text-decoration: none; color: #fff; }
-    .brand span { font-size: 1.2rem; font-weight: 700; }
-    .nav-links { display: flex; gap: .5rem; }
-    .nav-links a {
-      color: rgba(255,255,255,.75);
-      text-decoration: none;
-      padding: .45rem 1rem;
-      border-radius: 8px;
-      font-size: .9rem;
-      font-weight: 500;
-      transition: background .2s, color .2s;
+    .brand {
+      text-decoration: none; color: #111827;
+      font-size: 1.2rem; font-weight: 700;
+      display: flex; align-items: center; gap: 8px;
     }
-    .nav-links a:hover, .nav-links a.active { background: rgba(255,255,255,.12); color: #fff; }
-    /* HERO */
-    .hero { text-align: center; padding: 3.5rem 1.5rem 2rem; }
+    .header-actions { display: flex; align-items: center; gap: 15px; }
+    .icon-btn {
+      font-size: 1.2rem;
+      border: 2px solid black;
+      border-radius: 50%;
+      width: 40px; height: 40px;
+      display: inline-flex; align-items: center; justify-content: center;
+      cursor: pointer; background: white;
+      text-decoration: none; color: black;
+      position: relative; transition: background 0.2s;
+    }
+    .icon-btn:hover { background: #f3f4f6; }
+    .icon-btn.no-border { border: none; font-size: 1.4rem; }
+    
+    .red-dot {
+      position: absolute;
+      top: -2px; right: -2px;
+      width: 10px; height: 10px;
+      background: red;
+      border-radius: 50%;
+    }
+    /* HERO BANNER CARD */
+    .hero {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      margin: 20px auto;
+      max-width: 800px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+      text-align: center;
+      border: 1px solid var(--gray-100);
+    }
     .hero-badge {
       display: inline-flex; align-items: center; gap: .4rem;
       background: var(--green-light); color: var(--green-dark);
       padding: .35rem 1rem; border-radius: 999px;
       font-size: .8rem; font-weight: 600; margin-bottom: 1.2rem;
     }
-    .hero h1 { font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 800; color: var(--green-dark); line-height: 1.2; margin-bottom: .8rem; }
+    .hero h1 { font-size: clamp(1.6rem, 3.5vw, 2.4rem); font-weight: 800; color: var(--green-dark); line-height: 1.2; margin-bottom: .8rem; }
     .hero h1 span { color: var(--green-accent); }
-    .hero p { color: var(--gray-500); font-size: 1rem; max-width: 500px; margin: 0 auto 2rem; line-height: 1.7; }
+    .hero p { color: var(--gray-500); font-size: 1rem; max-width: 500px; margin: 0 auto; line-height: 1.7; }
     /* CARD */
     .card {
       background: var(--white);
-      border-radius: var(--radius);
-      box-shadow: 0 12px 40px rgba(0,0,0,.12);
-      padding: 2.5rem;
+      border-radius: 12px;
+      box-shadow: 0 8px 30px rgba(0,0,0,.08);
+      padding: 24px;
+      margin: 10px auto 4rem;
       max-width: 500px;
-      margin: 0 auto 4rem;
       border: 1px solid var(--gray-100);
     }
     .card-header { margin-bottom: 1.8rem; }
@@ -190,58 +214,7 @@
     }
     .btn-circle:active { transform: translateY(0); }
 
-    /* ── NOTIFICATION SYSTEM ── */
-    .notif-wrap { position: relative; display: flex; align-items: center; margin-left: 1rem; }
-    .bell-icon {
-      font-size: 1.2rem;
-      border: 2px solid black;
-      border-radius: 50%;
-      padding: 8px;
-      cursor: pointer;
-      background: white;
-      transition: background 0.2s;
-      position: relative;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      line-height: 1;
-      width: 40px; height: 40px;
-    }
-    .bell-icon:hover { background: #f3f4f6; }
-    .red-dot {
-      position: absolute;
-      top: -2px; right: -2px;
-      font-size: 12px;
-      display: none;
-    }
-    .notif-dropdown {
-      position: absolute;
-      top: 50px; right: 0;
-      background: white;
-      border: 1px solid #e5e7eb;
-      border-radius: 12px;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-      width: 320px;
-      display: none;
-      z-index: 100;
-      overflow: hidden;
-    }
-    .notif-dropdown.show { display: block; }
-    .notif-header {
-      padding: 1rem;
-      font-weight: 700;
-      border-bottom: 1px solid #e5e7eb;
-      background: #f9fafb;
-      color: var(--gray-700);
-    }
-    .notif-list { max-height: 300px; overflow-y: auto; }
-    .notif-item {
-      padding: 1rem;
-      border-bottom: 1px solid #e5e7eb;
-      font-size: 0.85rem;
-      color: var(--gray-600);
-    }
-    .notif-item:last-child { border-bottom: none; }
+    /* NOTIFICATIONS ARE IN A SEPARATE PAGE NOW */
     
     @keyframes shake {
       0% { transform: rotate(0); }
@@ -276,35 +249,21 @@
 <body>
 
   <nav class="navbar">
-    <a href="/" class="brand">
-      <span>🥗 FoodLink Rescue</span>
-    </a>
-    <div class="nav-links">
-      {% if session.get('role') != 'ngo' %}
-      <a href="/" class="active">Donate</a>
-      {% endif %}
-      <a href="/view">View Listings</a>
-      
+    <a href="/" class="brand">🥗 FoodLink Rescue</a>
+    <div class="header-actions">
+      <!-- Role indicator -->
       {% if session.get('role') %}
-      <div style="background: rgba(255,255,255,.2); padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.85rem; color: #fff; margin-left: 1rem; display: flex; align-items: center; gap: 0.5rem;">
-        <span>Logged in as: <strong>{{ session.get('role') | title }}</strong></span>
-        <a href="/set_role/clear" style="text-decoration: underline; font-size: 0.8rem; margin: 0; padding: 0; opacity: 0.8; color: #fff;">Change Role</a>
-      </div>
-      <div class="notif-wrap" id="notifWrap">
-        <div class="bell-icon" id="bellBtn">
-          🔔<span class="red-dot" id="redDot">🔴</span>
-        </div>
-        <div class="notif-dropdown" id="notifDropdown">
-          <div class="notif-header">Notifications</div>
-          <div class="notif-list">
-            {% for n in notifications %}
-            <div class="notif-item">{{ n.message }}</div>
-            {% else %}
-            <div class="notif-item" style="text-align:center;">No notifications yet.</div>
-            {% endfor %}
-          </div>
-        </div>
-      </div>
+      <div style="font-size: 0.85rem; color: #6b7280; display: none;">{{ session.get('role') | title }}</div>
+      {% endif %}
+      
+      <a href="/view" class="icon-btn no-border" title="Search">🔍</a>
+      {% if session.get('role') %}
+      <a href="/notifications" class="icon-btn bell-icon">
+        🔔
+        {% if has_unread %}
+        <div class="red-dot"></div>
+        {% endif %}
+      </a>
       {% endif %}
     </div>
   </nav>
@@ -431,35 +390,12 @@
 
   <script>
     // Notifications Logic
-    {% if session.get('role') %}
-    const notifications = {{ notifications | tojson }};
-    const notifHash = JSON.stringify(notifications);
-    const lastHash = localStorage.getItem('foodlinkNotifHash');
-
-    const bellBtn = document.getElementById('bellBtn');
-    const redDot = document.getElementById('redDot');
-    const dropdown = document.getElementById('notifDropdown');
-    const notifWrap = document.getElementById('notifWrap');
-
-    // Only alert if there are notifications AND it's a new state
-    if (notifHash !== lastHash && notifications.length > 0) {
-      redDot.style.display = 'block';
-      bellBtn.classList.add('shake');
-    }
-
-    bellBtn.addEventListener('click', (e) => {
-      dropdown.classList.toggle('show');
-      if (redDot.style.display === 'block') {
-        redDot.style.display = 'none';
-        bellBtn.classList.remove('shake');
-        localStorage.setItem('foodlinkNotifHash', notifHash);
-      }
-    });
-
-    // Close when clicking outside
-    document.addEventListener('click', (e) => {
-      if (!notifWrap.contains(e.target)) {
-        dropdown.classList.remove('show');
+    {% if has_unread %}
+    document.addEventListener('DOMContentLoaded', () => {
+      const bell = document.querySelector('.bell-icon');
+      if (bell) {
+        bell.classList.add('shake');
+        setTimeout(() => bell.classList.remove('shake'), 500);
       }
     });
     {% endif %}

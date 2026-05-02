@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notifications – FoodLink Rescue</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #f9fafb;
+      min-height: 100vh;
+      color: #111827;
+    }
+    /* ── NEW MODERN HEADER ── */
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 20px;
+      background: white;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      position: sticky;
+      top: 0; z-index: 50;
+    }
+    .brand {
+      text-decoration: none; color: #111827;
+      font-size: 1.2rem; font-weight: 700;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .header-actions { display: flex; align-items: center; gap: 15px; }
+    .icon-btn {
+      font-size: 1.2rem;
+      border: 2px solid black;
+      border-radius: 50%;
+      width: 40px; height: 40px;
+      display: inline-flex; align-items: center; justify-content: center;
+      cursor: pointer; background: white;
+      text-decoration: none; color: black;
+      position: relative; transition: background 0.2s;
+    }
+    .icon-btn:hover { background: #f3f4f6; }
+    .icon-btn.no-border { border: none; font-size: 1.4rem; }
+    
+    .red-dot {
+      position: absolute;
+      top: -2px; right: -2px;
+      width: 10px; height: 10px;
+      background: red;
+      border-radius: 50%;
+    }
+    
+    /* ── PAGE CONTENT ── */
+    .container {
+      max-width: 600px; margin: 20px auto; padding: 0 20px;
+    }
+    h1 { font-size: 1.8rem; font-weight: 800; margin-bottom: 20px; color: #064e3b; }
+    
+    .notif-card {
+      background: white; border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+      padding: 20px; margin-bottom: 15px;
+      display: flex; align-items: flex-start; gap: 15px;
+    }
+    .notif-text { font-size: 1rem; font-weight: 500; color: #374151; }
+    
+    .empty-state {
+      text-align: center; padding: 60px 20px;
+      background: white; border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    }
+    .empty-state .bell-large { font-size: 4rem; margin-bottom: 15px; color: #9ca3af; }
+    .empty-state h3 { font-size: 1.4rem; font-weight: 700; color: #374151; margin-bottom: 10px; }
+    .empty-state p { color: #6b7280; font-size: 1rem; }
+    
+    .back-link {
+      display: inline-block; margin-bottom: 15px;
+      text-decoration: none; color: #10b981; font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <a href="/" class="brand">🥗 FoodLink Rescue</a>
+    <div class="header-actions">
+      <a href="/view" class="icon-btn no-border" title="Search">🔍</a>
+      {% if session.get('role') %}
+      <a href="/notifications" class="icon-btn bell-icon">
+        🔔
+      </a>
+      {% endif %}
+    </div>
+  </nav>
+
+  <div class="container">
+    <a href="javascript:history.back()" class="back-link">← Go Back</a>
+    <h1>Notifications</h1>
+    
+    {% if not session.get('role') %}
+      <div class="empty-state">
+        <div class="bell-large">🔔</div>
+        <h3>Please log in</h3>
+        <p>You need to select a role to see your notifications.</p>
+      </div>
+    {% elif notifications %}
+      {% for n in notifications %}
+      <div class="notif-card">
+        <div class="notif-text">{{ n.message }}</div>
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="empty-state">
+        <div class="bell-large">🔕</div>
+        <h3>No Notifications Yet</h3>
+        <p>You will see updates here</p>
+      </div>
+    {% endif %}
+  </div>
+</body>
+</html>

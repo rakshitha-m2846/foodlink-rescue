@@ -238,7 +238,27 @@ def inject_notifications():
             'message': msg
         })
     
-    return dict(notifications=notifications)
+    highest_id = max([n['id'] for n in notifications]) if notifications else 0
+    has_unread = session.get('last_seen_notif_id', 0) < highest_id
+
+    return dict(notifications=notifications, has_unread=has_unread)
+
+@app.route("/notifications", methods=["GET"])
+def notifications_page():
+    """
+    Displays the notifications and clears the unread state.
+    """
+    # Calculate highest id to mark as read
+    conn = get_db_connection()
+    try:
+        latest = conn.execute("SELECT id FROM food_listings ORDER BY id DESC LIMIT 1").fetchone()
+        if latest:
+            session['last_seen_notif_id'] = latest['id']
+    except sqlite3.OperationalError:
+        pass
+    finally:
+        conn.close()
+    return render_template("notifications.html")
 
 
 # -----------------------------------------------------------
