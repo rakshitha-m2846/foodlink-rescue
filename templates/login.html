@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login to FoodLink Rescue</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #ecfdf5 0%, #f0fdf4 60%, #fefce8 100%);
+      min-height: 100vh;
+      display: flex; align-items: center; justify-content: center;
+      color: #111827;
+    }
+    .login-card {
+      background: white; border-radius: 14px;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.08);
+      padding: 40px 30px; width: 100%; max-width: 400px;
+      text-align: center; border: 1px solid #f3f4f6;
+    }
+    h1 { font-size: 1.6rem; font-weight: 800; color: #064e3b; margin-bottom: 25px; }
+    .form-group { margin-bottom: 20px; text-align: left; }
+    label { display: block; font-size: 0.85rem; font-weight: 600; color: #374151; margin-bottom: 6px; }
+    input[type="text"] {
+      width: 100%; padding: 12px;
+      border: 1.5px solid #e5e7eb; border-radius: 10px;
+      font-size: 0.95rem; font-family: inherit; color: #111827;
+      background: #f9fafb; outline: none; transition: border-color 0.2s;
+    }
+    input[type="text"]:focus { border-color: #10b981; background: white; }
+    .role-buttons { display: flex; gap: 10px; margin-top: 10px; }
+    .btn-role {
+      flex: 1; padding: 12px; border: none; border-radius: 10px;
+      font-size: 0.95rem; font-weight: 700; cursor: pointer; color: white;
+      transition: transform 0.15s, opacity 0.2s;
+    }
+    .btn-role:hover { opacity: 0.9; transform: translateY(-1px); }
+    .btn-donor { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
+    .btn-ngo { background: #064e3b; }
+  </style>
+</head>
+<body>
+  <div class="login-card">
+    <div style="font-size: 3rem; margin-bottom: 10px;">🥗</div>
+    <h1>Login to FoodLink Rescue</h1>
+    <form action="/login" method="POST">
+      <div class="form-group">
+        <label for="user_name">Name (Optional)</label>
+        <input type="text" id="user_name" name="user_name" placeholder="Enter your name">
+      </div>
+      <div class="role-buttons">
+        <button type="submit" name="role" value="donor" class="btn-role btn-donor">Login as Donor</button>
+        <button type="submit" name="role" value="ngo" class="btn-role btn-ngo">Login as NGO</button>
+      </div>
+    </form>
+  </div>
+</body>
+</html>

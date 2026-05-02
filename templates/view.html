@@ -72,6 +72,38 @@
       display: flex; align-items: center; justify-content: center;
     }
 
+    /* PROFILE DROPDOWN */
+    .profile-dropdown {
+      position: absolute;
+      top: 50px; right: 0;
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      width: 200px;
+      display: none;
+      z-index: 100;
+      overflow: hidden;
+    }
+    .profile-dropdown.show { display: block; }
+    .profile-header {
+      padding: 1rem;
+      border-bottom: 1px solid #e5e7eb;
+      background: #f9fafb;
+    }
+    .profile-header strong { display: block; font-size: 0.95rem; color: #111827; margin-bottom: 2px; }
+    .profile-header span { font-size: 0.8rem; color: #6b7280; text-transform: capitalize; }
+    .profile-list { padding: 0.5rem 0; }
+    .profile-item {
+      display: block;
+      padding: 0.5rem 1rem;
+      color: #374151;
+      text-decoration: none;
+      font-size: 0.85rem;
+      transition: background 0.2s;
+    }
+    .profile-item:hover { background: #f3f4f6; }
+
     /* ── PAGE HEADER ── */
     .page-header {
       max-width: 1000px; margin: 0 auto;
@@ -327,20 +359,33 @@
     </div>
     
     <div class="header-actions">
-      <!-- Role indicator -->
-      {% if session.get('role') %}
-      <div style="font-size: 0.85rem; color: #6b7280; display: none;">{{ session.get('role') | title }}</div>
-      {% endif %}
-      
       <a href="/view" class="icon-btn" title="Search">
         <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
       </a>
+      {% if session.get('role') %}
       <a href="/notifications" class="icon-btn bell-icon" title="Notifications">
         <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
         {% if unread_count > 0 %}
         <div class="red-dot">{{ unread_count }}</div>
         {% endif %}
       </a>
+      
+      <div style="position: relative;" id="profileWrap">
+        <button class="icon-btn" title="Profile" id="profileBtn">
+          <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+        </button>
+        <div class="profile-dropdown" id="profileDropdown">
+          <div class="profile-header">
+            <strong>{{ session.get('user_name', 'Guest') }}</strong>
+            <span>{{ session.get('role') }}</span>
+          </div>
+          <div class="profile-list">
+            <a href="/switch-role" class="profile-item">Switch Role</a>
+            <a href="/logout" class="profile-item" style="color: #ef4444;">Logout</a>
+          </div>
+        </div>
+      </div>
+      {% endif %}
     </div>
   </nav>
 
@@ -512,6 +557,28 @@
   </div>
 
   <script>
+    {% if session.get('role') %}
+    document.addEventListener('DOMContentLoaded', () => {
+      // Profile Dropdown
+      const profileBtn = document.getElementById('profileBtn');
+      const profileDropdown = document.getElementById('profileDropdown');
+      const profileWrap = document.getElementById('profileWrap');
+      
+      if (profileBtn && profileDropdown) {
+        profileBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          profileDropdown.classList.toggle('show');
+        });
+        
+        document.addEventListener('click', (e) => {
+          if (profileWrap && !profileWrap.contains(e.target)) {
+            profileDropdown.classList.remove('show');
+          }
+        });
+      }
+    });
+    {% endif %}
+
     {% if has_unread %}
     document.addEventListener('DOMContentLoaded', () => {
       const bell = document.querySelector('.bell-icon');

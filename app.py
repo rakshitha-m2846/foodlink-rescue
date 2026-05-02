@@ -78,10 +78,40 @@ def index():
     Homepage – displays the food donation submission form.
     Redirects NGOs to the view page automatically.
     """
+    if not session.get("role"):
+        return redirect(url_for("login"))
     if session.get("role") == "ngo":
         return redirect(url_for("view"))
     return render_template("index.html")
 
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    """
+    Simple login route handling both GET (show form) and POST (process form).
+    """
+    if request.method == "POST":
+        role = request.form.get("role")
+        user_name = request.form.get("user_name", "").strip() or "Guest"
+        if role in ["donor", "ngo"]:
+            session["role"] = role
+            session["user_name"] = user_name
+            return redirect(url_for("index"))
+    return render_template("login.html")
+
+@app.route("/switch-role")
+def switch_role():
+    current_role = session.get("role")
+    if current_role == "donor":
+        session["role"] = "ngo"
+    elif current_role == "ngo":
+        session["role"] = "donor"
+    return redirect(url_for("index"))
+
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect(url_for("login"))
 
 @app.route("/set_role/<role>")
 def set_role(role):
