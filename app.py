@@ -203,7 +203,7 @@ def inject_notifications():
     """
     role = session.get('role')
     if not role:
-        return dict(notifications=[])
+        return dict(notifications=[], has_unread=False, unread_count=0)
         
     conn = get_db_connection()
     try:
