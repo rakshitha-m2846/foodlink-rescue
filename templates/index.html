@@ -349,7 +349,7 @@
   {% else %}
   <div class="card">
     <div class="card-header">
-      <h2>📦 Submit a Food Donation</h2>
+      <h2>Submit a Food Donation</h2>
       <p>Fill in the details below — your listing appears instantly.</p>
     </div>
 
@@ -382,7 +382,9 @@
           <!-- GPS Detect Button – matches reference image design -->
           <button type="button" class="detect-btn" id="detectLocationBtn"
                   onclick="detectLocation()" title="Detect my current location">
-            <span class="pin-icon">&#128247;</span>
+            <span class="pin-icon" style="display: flex; color: black;">
+              <svg width="1.2rem" height="1.2rem" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+            </span>
             <span class="spin"></span>
             <span class="detect-text">
               <span class="dt-main">Detect current location</span>
@@ -396,12 +398,14 @@
         <p class="input-hint">Street address or landmark, or use GPS to auto-fill.</p>
       </div>
       <button type="submit" class="btn-submit" id="submitBtn">
-        🚀 Submit Donation
+        Submit Donation
       </button>
     </form>
 
     <div class="view-link">
-      <a href="/view">View all available listings →</a>
+      <a href="/view" title="View all available listings" style="display: inline-flex; color: black; border: none;">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+      </a>
     </div>
   </div>
   {% endif %}
