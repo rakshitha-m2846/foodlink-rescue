@@ -239,9 +239,11 @@ def inject_notifications():
         })
     
     highest_id = max([n['id'] for n in notifications]) if notifications else 0
-    has_unread = session.get('last_seen_notif_id', 0) < highest_id
+    last_seen = session.get('last_seen_notif_id', 0)
+    has_unread = last_seen < highest_id
+    unread_count = sum(1 for n in notifications if n['id'] > last_seen)
 
-    return dict(notifications=notifications, has_unread=has_unread)
+    return dict(notifications=notifications, has_unread=has_unread, unread_count=unread_count)
 
 @app.route("/notifications", methods=["GET"])
 def notifications_page():

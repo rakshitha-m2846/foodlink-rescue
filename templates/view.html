@@ -65,10 +65,14 @@
     
     .red-dot {
       position: absolute;
-      top: -2px; right: -2px;
-      width: 10px; height: 10px;
+      top: -5px; right: -5px;
+      width: 18px; height: 18px;
       background: red;
+      color: white;
+      font-size: 10px;
+      font-weight: bold;
       border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
     }
 
     /* ── PAGE HEADER ── */
@@ -315,7 +319,16 @@
 
   <!-- NAVBAR -->
   <nav class="navbar">
-    <a href="/" class="brand">🥗 FoodLink Rescue</a>
+    <div class="nav-left" style="display: flex; align-items: center; gap: 10px;">
+      <button class="icon-btn" id="backBtn" onclick="history.back()" aria-label="Go Back" title="Go Back" style="font-size: 1.1rem;">
+        &#8592;
+      </button>
+      <a href="/set_role/clear" class="icon-btn" aria-label="Home" title="Home" style="font-size: 1.1rem; text-decoration: none;">
+        🏠
+      </a>
+      <a href="/" class="brand" style="margin-left: 10px;">🥗 FoodLink Rescue</a>
+    </div>
+    
     <div class="header-actions">
       <!-- Role indicator -->
       {% if session.get('role') %}
@@ -326,26 +339,13 @@
       {% if session.get('role') %}
       <a href="/notifications" class="icon-btn bell-icon">
         🔔
-        {% if has_unread %}
-        <div class="red-dot"></div>
+        {% if unread_count > 0 %}
+        <div class="red-dot">{{ unread_count }}</div>
         {% endif %}
       </a>
       {% endif %}
     </div>
   </nav>
-
-  <!-- ACTION BUTTONS -->
-  <div class="action-buttons">
-    <button class="btn-circle" id="backBtn" onclick="history.back()" aria-label="Go Back" title="Go Back">
-      &#8592;
-    </button>
-    <a href="/set_role/clear" class="btn-circle" aria-label="Home" title="Home">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-        <polyline points="9 22 9 12 15 12 15 22"></polyline>
-      </svg>
-    </a>
-  </div>
 
   <!-- PAGE HEADER -->
   <div class="page-header">

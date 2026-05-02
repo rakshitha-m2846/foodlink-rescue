@@ -46,10 +46,14 @@
     
     .red-dot {
       position: absolute;
-      top: -2px; right: -2px;
-      width: 10px; height: 10px;
+      top: -5px; right: -5px;
+      width: 18px; height: 18px;
       background: red;
+      color: white;
+      font-size: 10px;
+      font-weight: bold;
       border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
     }
     
     /* ── PAGE CONTENT ── */
@@ -83,12 +87,29 @@
 </head>
 <body>
   <nav class="navbar">
-    <a href="/" class="brand">🥗 FoodLink Rescue</a>
+    <div class="nav-left" style="display: flex; align-items: center; gap: 10px;">
+      <button class="icon-btn" id="backBtn" onclick="history.back()" aria-label="Go Back" title="Go Back" style="font-size: 1.1rem;">
+        &#8592;
+      </button>
+      <a href="/set_role/clear" class="icon-btn" aria-label="Home" title="Home" style="font-size: 1.1rem; text-decoration: none;">
+        🏠
+      </a>
+      <a href="/" class="brand" style="margin-left: 10px;">🥗 FoodLink Rescue</a>
+    </div>
+    
     <div class="header-actions">
+      <!-- Role indicator -->
+      {% if session.get('role') %}
+      <div style="font-size: 0.85rem; color: #6b7280; display: none;">{{ session.get('role') | title }}</div>
+      {% endif %}
+      
       <a href="/view" class="icon-btn no-border" title="Search">🔍</a>
       {% if session.get('role') %}
       <a href="/notifications" class="icon-btn bell-icon">
         🔔
+        {% if unread_count > 0 %}
+        <div class="red-dot">{{ unread_count }}</div>
+        {% endif %}
       </a>
       {% endif %}
     </div>
