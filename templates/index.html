@@ -224,6 +224,42 @@
     .view-link { text-align: center; margin-top: 1.3rem; }
     .view-link a { color: var(--green-accent); font-weight: 600; font-size: .9rem; text-decoration: none; }
     .view-link a:hover { text-decoration: underline; }
+    .help-modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.45);
+      backdrop-filter: blur(2px);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+    .help-modal-overlay.show { display: flex; }
+    .help-modal-box {
+      width: min(100%, 960px);
+      max-height: 90vh;
+      overflow-y: auto;
+      background: rgba(255,255,255,.98);
+      border-radius: 20px;
+      box-shadow: 0 24px 70px rgba(0,0,0,.25);
+      position: relative;
+      padding: 1.5rem;
+    }
+    .help-modal-close {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      width: 36px;
+      height: 36px;
+      border: none;
+      border-radius: 50%;
+      background: #fff;
+      color: var(--gray-700);
+      font-size: 1.1rem;
+      cursor: pointer;
+      box-shadow: 0 6px 18px rgba(0,0,0,.12);
+    }
     /* ACTION BUTTONS */
     .action-buttons {
       position: absolute;
@@ -316,6 +352,7 @@
           </div>
           <div class="profile-list">
             <a href="/switch-role" class="profile-item">Switch Role</a>
+            <a href="#" class="profile-item" id="helpBtn">Help</a>
             <a href="/logout" class="profile-item" style="color: #ef4444;">Logout</a>
           </div>
         </div>
@@ -410,30 +447,35 @@
   </div>
   {% endif %}
 
-  <section class="hiw">
-    <h2>How FoodLink Rescue Works</h2>
-    <div class="steps">
-      <div class="step">
-        <div class="step-num">1</div>
-        <h3>Restaurant Lists Food</h3>
-        <p>Any restaurant or food business submits their surplus food via the simple form above.</p>
-      </div>
-      <div class="step">
-        <div class="step-num">2</div>
-        <h3>NGO Browses Listings</h3>
-        <p>Registered NGOs and volunteers browse the live listings page to find available donations nearby.</p>
-      </div>
-      <div class="step">
-        <div class="step-num">3</div>
-        <h3>Food Gets Collected</h3>
-        <p>The NGO travels to the pickup location, collects the food, and marks the listing as claimed.</p>
-      </div>
-    </div>
-  </section>
-
   <footer>
     <p>Made with ❤️ by <strong>FoodLink Rescue</strong> — Together we can end food waste.</p>
   </footer>
+
+  <div class="help-modal-overlay" id="helpModal" aria-hidden="true">
+    <div class="help-modal-box" role="dialog" aria-modal="true" aria-labelledby="helpModalTitle">
+      <button class="help-modal-close" id="helpCloseBtn" aria-label="Close Help">×</button>
+      <section class="hiw" id="helpSection">
+        <h2 id="helpModalTitle">How FoodLink Rescue Works</h2>
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <h3>Restaurant Lists Food</h3>
+            <p>Any restaurant or food business submits their surplus food via the simple form above.</p>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <h3>NGO Browses Listings</h3>
+            <p>Registered NGOs and volunteers browse the live listings page to find available donations nearby.</p>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <h3>Food Gets Collected</h3>
+            <p>The NGO travels to the pickup location, collects the food, and marks the listing as claimed.</p>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
 
   <script>
     {% if session.get('role') %}
@@ -442,6 +484,9 @@
       const profileBtn = document.getElementById('profileBtn');
       const profileDropdown = document.getElementById('profileDropdown');
       const profileWrap = document.getElementById('profileWrap');
+      const helpBtn = document.getElementById('helpBtn');
+      const helpModal = document.getElementById('helpModal');
+      const helpCloseBtn = document.getElementById('helpCloseBtn');
       
       if (profileBtn && profileDropdown) {
         profileBtn.addEventListener('click', (e) => {
@@ -455,6 +500,32 @@
           }
         });
       }
+
+      if (helpBtn && helpModal) {
+        helpBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          profileDropdown.classList.remove('show');
+          helpModal.classList.add('show');
+        });
+      }
+
+      if (helpCloseBtn && helpModal) {
+        helpCloseBtn.addEventListener('click', () => {
+          helpModal.classList.remove('show');
+        });
+      }
+
+      helpModal.addEventListener('click', (e) => {
+        if (e.target === helpModal) {
+          helpModal.classList.remove('show');
+        }
+      });
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          helpModal.classList.remove('show');
+        }
+      });
     });
     {% endif %}
 
