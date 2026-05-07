@@ -452,28 +452,6 @@
       <span class="chip-val">{{ listings | length }}</span>
       Active Listing{{ 's' if listings | length != 1 else '' }}
     </div>
-    <div class="stat-chip">
-      🕐 Updated Live
-    </div>
-    <div class="stat-chip">
-      🌍 All Locations
-    </div>
-  </div>
-
-  <!-- LOCATION SEARCH BAR -->
-  <div class="search-wrap" id="searchSection">
-    <div class="search-box">
-      <span class="search-icon">📍</span>
-      <input
-        type="text"
-        id="locationSearch"
-        placeholder="Search by location (e.g. Bengaluru, MG Road)…"
-        aria-label="Filter listings by location"
-        autocomplete="off"
-      />
-      <button class="search-clear" id="searchClearBtn" onclick="clearSearch()" title="Clear search">✕ Clear</button>
-    </div>
-    <p class="search-result-label" id="searchResultLabel"></p>
   </div>
 
   <!-- TABLE / EMPTY STATE -->
