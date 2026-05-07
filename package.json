@@ -1,0 +1,24 @@
+{
+  "name": "foodlink-rescue",
+  "version": "1.0.0",
+  "description": "FoodLink Rescue is a web platform designed to reduce food waste by connecting restaurants with NGOs and volunteers.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rakshitha-m2846/foodlink-rescue.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/rakshitha-m2846/foodlink-rescue/issues"
+  },
+  "homepage": "https://github.com/rakshitha-m2846/foodlink-rescue#readme",
+  "dependencies": {
+    "firebase": "^12.12.1"
+  }
+}

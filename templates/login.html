@@ -7,6 +7,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <style>
+    /* ── Existing styles – unchanged ───────────────────────── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: 'Inter', sans-serif;
@@ -31,6 +32,13 @@
       background: #f9fafb; outline: none; transition: border-color 0.2s;
     }
     input[type="text"]:focus { border-color: #10b981; background: white; }
+    input[type="tel"] {
+      width: 100%; padding: 12px;
+      border: 1.5px solid #e5e7eb; border-radius: 10px;
+      font-size: 0.95rem; font-family: inherit; color: #111827;
+      background: #f9fafb; outline: none; transition: border-color 0.2s;
+    }
+    input[type="tel"]:focus { border-color: #10b981; background: white; }
     .role-buttons { display: flex; gap: 10px; margin-top: 10px; }
     .btn-role {
       flex: 1; padding: 12px; border: none; border-radius: 10px;
@@ -39,23 +47,236 @@
     }
     .btn-role:hover { opacity: 0.9; transform: translateY(-1px); }
     .btn-donor { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
-    .btn-ngo { background: #064e3b; }
+    .btn-ngo   { background: #064e3b; }
+
+    /* ── OTP flow styles – unchanged ───────────────────────── */
+    .phone-row { display: flex; gap: 8px; align-items: center; }
+    .phone-prefix {
+      padding: 12px 10px;
+      border: 1.5px solid #e5e7eb; border-radius: 10px;
+      font-size: 0.95rem; font-family: inherit;
+      color: #374151; background: #f3f4f6; font-weight: 600;
+      white-space: nowrap; flex-shrink: 0;
+    }
+    .phone-row input[type="tel"] { flex: 1; }
+    .btn-otp {
+      width: 100%; padding: 12px; border: none; border-radius: 10px;
+      font-size: 0.95rem; font-weight: 700; cursor: pointer; color: white;
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      transition: transform 0.15s, opacity 0.2s; margin-top: 4px;
+    }
+    .btn-otp:hover    { opacity: 0.9; transform: translateY(-1px); }
+    .btn-otp:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+    .status-msg {
+      font-size: 0.82rem; margin-top: 10px; min-height: 18px;
+      text-align: center; font-weight: 500;
+    }
+    .status-msg.error   { color: #dc2626; }
+    .status-msg.success { color: #059669; }
+    .status-msg.info    { color: #6b7280; }
+    .step { display: none; }
+    .step.active { display: block; }
   </style>
 </head>
 <body>
   <div class="login-card">
     <div style="font-size: 3rem; margin-bottom: 10px;">🥗</div>
     <h1>Login to FoodLink Rescue</h1>
-    <form action="/login" method="POST">
+
+    <!-- ══════════════════════════════════════════════════════
+         STEP 1 – Phone number + Send OTP
+         (Name / email / DOB are set from Profile after login)
+         ══════════════════════════════════════════════════════ -->
+    <div id="step-phone" class="step active">
       <div class="form-group">
-        <label for="user_name">Name (Optional)</label>
-        <input type="text" id="user_name" name="user_name" placeholder="Enter your name">
+        <label for="phone_number">Phone Number</label>
+        <div class="phone-row">
+          <span class="phone-prefix">+91</span>
+          <input type="tel" id="phone_number" name="phone_number"
+                 placeholder="10-digit mobile number" maxlength="10" inputmode="numeric">
+        </div>
       </div>
+      <div id="recaptcha-container"></div>
+      <button id="btn-send-otp" class="btn-otp">Send OTP</button>
+      <p id="msg-phone" class="status-msg info"></p>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════
+         STEP 2 – OTP input + Verify button
+         ══════════════════════════════════════════════════════ -->
+    <div id="step-otp" class="step">
+      <div class="form-group">
+        <label for="otp_code">Enter OTP</label>
+        <input type="text" id="otp_code" name="otp_code"
+               placeholder="6-digit OTP" maxlength="6" inputmode="numeric">
+      </div>
+      <button id="btn-verify-otp" class="btn-otp">Verify OTP</button>
+      <p id="msg-otp" class="status-msg info"></p>
+    </div>
+
+    <!-- ══════════════════════════════════════════════════════
+         STEP 3 – Role selection (original donor / NGO buttons)
+         Posts to existing Flask /login route – no backend changes.
+         ══════════════════════════════════════════════════════ -->
+    <div id="step-role" class="step">
+      <p style="font-size:0.85rem; color:#059669; font-weight:600; margin-bottom:18px;">
+        ✅ Phone verified! Choose your role to continue.
+      </p>
+      <form id="role-form" action="/login" method="POST">
+        <input type="hidden" id="hidden_user_name" name="user_name" value="User">
+        <input type="hidden" id="hidden_role"      name="role"      value="">
+      </form>
       <div class="role-buttons">
-        <button type="submit" name="role" value="donor" class="btn-role btn-donor">Login as Donor</button>
-        <button type="submit" name="role" value="ngo" class="btn-role btn-ngo">Login as NGO</button>
+        <button type="button" class="btn-role btn-donor" onclick="submitRole('donor')">Login as Donor</button>
+        <button type="button" class="btn-role btn-ngo"   onclick="submitRole('ngo')">Login as NGO</button>
       </div>
-    </form>
-  </div>
+      <p id="msg-role" class="status-msg info"></p>
+    </div>
+
+  </div><!-- /.login-card -->
+
+  <script>
+    // ============================================================
+    // DEMO MODE – simulated OTP (no real SMS sent)
+    // To activate Firebase Phone Auth in production:
+    //   1. Uncomment the <script type="module"> block below
+    //   2. Remove this demo <script> block
+    //   3. Add localhost / your domain to Firebase Console →
+    //      Authentication → Settings → Authorized domains
+    // ============================================================
+
+    const DEMO_OTP = '123456';
+
+    // ── Helpers ──────────────────────────────────────────────────
+    function showStep(id) {
+      document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+    }
+
+    function setMsg(elId, text, type) {
+      const el = document.getElementById(elId);
+      el.textContent = text;
+      el.className = 'status-msg ' + (type || 'info');
+    }
+
+    // ── STEP 1 – Send OTP (demo) ─────────────────────────────────
+    document.getElementById('btn-send-otp').addEventListener('click', function () {
+      const phone = document.getElementById('phone_number').value.trim();
+
+      if (!phone || phone.length < 10 || !/^\d{10}$/.test(phone)) {
+        setMsg('msg-phone', '⚠️ Enter a valid 10-digit mobile number.', 'error');
+        return;
+      }
+
+      // Demo: no real SMS – just reveal OTP field
+      setMsg('msg-phone', '📩 Demo OTP sent. Use 123456 to verify.', 'success');
+      setTimeout(function () { showStep('step-otp'); }, 800);
+    });
+
+    // ── STEP 2 – Verify OTP (demo) ───────────────────────────────
+    document.getElementById('btn-verify-otp').addEventListener('click', function () {
+      const btn  = document.getElementById('btn-verify-otp');
+      const code = document.getElementById('otp_code').value.trim();
+
+      if (!code || code.length !== 6) {
+        setMsg('msg-otp', '⚠️ Enter the 6-digit OTP.', 'error');
+        return;
+      }
+
+      if (code === DEMO_OTP) {
+        btn.disabled = true;
+        setMsg('msg-otp', '✅ OTP verified!', 'success');
+        setTimeout(function () { showStep('step-role'); }, 400);
+      } else {
+        setMsg('msg-otp', '❌ Invalid OTP. Please try again.', 'error');
+        document.getElementById('otp_code').value = '';
+        document.getElementById('otp_code').focus();
+      }
+    });
+
+    // ── Allow Enter key in OTP field ─────────────────────────────
+    document.getElementById('otp_code').addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') document.getElementById('btn-verify-otp').click();
+    });
+
+    // ── STEP 3 – Role → Flask /login POST ────────────────────────
+    window.submitRole = function (role) {
+      document.getElementById('hidden_role').value = role;
+      document.getElementById('role-form').submit();
+    };
+  </script>
+
+  <!--
+  ================================================================
+  FIREBASE PHONE AUTH – preserved for future production activation
+  Uncomment this block and remove the demo <script> above to enable.
+  Also delete: <script src="..."> tag below if using this module.
+  ================================================================
+
+  <script type="module">
+    import { auth, setupRecaptcha }
+      from "{{ url_for('static', filename='firebase.js') }}";
+    import { signInWithPhoneNumber }
+      from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+    function showStep(id) {
+      document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+    }
+    function setMsg(elId, text, type) {
+      const el = document.getElementById(elId);
+      el.textContent = text;
+      el.className = 'status-msg ' + (type || 'info');
+    }
+
+    document.getElementById('btn-send-otp').addEventListener('click', async () => {
+      const btn   = document.getElementById('btn-send-otp');
+      const phone = document.getElementById('phone_number').value.trim();
+      if (!phone || !/^\d{10}$/.test(phone)) {
+        setMsg('msg-phone', '⚠️ Enter a valid 10-digit mobile number.', 'error');
+        return;
+      }
+      btn.disabled = true;
+      setMsg('msg-phone', '⏳ Sending OTP…', 'info');
+      try {
+        const verifier = setupRecaptcha('btn-send-otp');
+        window._confirmResult = await signInWithPhoneNumber(auth, '+91' + phone, verifier);
+        setMsg('msg-phone', '✅ OTP sent! Check your SMS.', 'success');
+        setTimeout(() => showStep('step-otp'), 700);
+      } catch (err) {
+        setMsg('msg-phone', '❌ ' + (err.message || 'Could not send OTP.'), 'error');
+        btn.disabled = false;
+        window._recaptchaVerifier = null;
+      }
+    });
+
+    document.getElementById('btn-verify-otp').addEventListener('click', async () => {
+      const btn  = document.getElementById('btn-verify-otp');
+      const code = document.getElementById('otp_code').value.trim();
+      if (!code || code.length !== 6) {
+        setMsg('msg-otp', '⚠️ Enter the 6-digit OTP.', 'error');
+        return;
+      }
+      btn.disabled = true;
+      setMsg('msg-otp', '⏳ Verifying…', 'info');
+      try {
+        await window._confirmResult.confirm(code);
+        setMsg('msg-otp', '✅ Verified!', 'success');
+        setTimeout(() => showStep('step-role'), 400);
+      } catch (err) {
+        const msg = err.code === 'auth/invalid-verification-code'
+          ? 'Wrong OTP. Please try again.' : (err.message || 'Verification failed.');
+        setMsg('msg-otp', '❌ ' + msg, 'error');
+        btn.disabled = false;
+      }
+    });
+
+    window.submitRole = function (role) {
+      document.getElementById('hidden_role').value = role;
+      document.getElementById('role-form').submit();
+    };
+  </script>
+  -->
+
 </body>
 </html>
