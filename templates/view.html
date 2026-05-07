@@ -59,6 +59,47 @@
     }
     .icon-btn:hover { opacity: 0.7; }
     .icon-btn svg { width: 24px; height: 24px; stroke: currentColor; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .top-search-container { position: relative; }
+    .top-search-dropdown {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      width: min(260px, calc(100vw - 32px));
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 14px;
+      box-shadow: 0 16px 40px rgba(0,0,0,.12);
+      padding: 0.85rem;
+      box-sizing: border-box;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-4px);
+      transition: opacity .18s ease, transform .18s ease, visibility .18s ease;
+      z-index: 120;
+      pointer-events: none;
+    }
+    .top-search-dropdown.show {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+    .top-search-input {
+      width: 100%;
+      padding: 0.75rem 0.9rem;
+      border: 1.5px solid var(--gray-200);
+      border-radius: 12px;
+      font-size: 0.95rem;
+      font-family: inherit;
+      background: var(--gray-50);
+      color: var(--gray-900);
+      outline: none;
+    }
+    .top-search-input:focus {
+      border-color: var(--green-accent);
+      box-shadow: 0 0 0 3px rgba(16,185,129,.12);
+      background: #fff;
+    }
     
     .red-dot {
       position: absolute;
@@ -359,9 +400,14 @@
     </div>
     
     <div class="header-actions">
-      <a href="/view" class="icon-btn" title="Search">
-        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-      </a>
+      <div class="top-search-container" id="topSearchContainer">
+        <button class="icon-btn" id="searchToggleBtn" title="Search" type="button" aria-expanded="false">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        </button>
+        <div class="top-search-dropdown" id="topSearchDropdown" aria-label="Search listings">
+          <input id="topSearchInput" class="top-search-input" type="text" placeholder="Search..." aria-label="Search listings" autocomplete="off" />
+        </div>
+      </div>
       {% if session.get('role') %}
       <a href="/notifications" class="icon-btn bell-icon" title="Notifications">
         <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
@@ -592,10 +638,13 @@
     /* ============================================================
        LOCATION SEARCH - filters table rows as the user types
        ============================================================ */
-    var searchInput  = document.getElementById('locationSearch');
-    var clearBtn     = document.getElementById('searchClearBtn');
-    var resultLabel  = document.getElementById('searchResultLabel');
-    var noResultsRow = document.getElementById('noResultsRow');
+    var topSearchInput = document.getElementById('topSearchInput');
+    var searchInput    = document.getElementById('locationSearch');
+    var clearBtn       = document.getElementById('searchClearBtn');
+    var resultLabel    = document.getElementById('searchResultLabel');
+    var noResultsRow   = document.getElementById('noResultsRow');
+    var topSearchDropdown = document.getElementById('topSearchDropdown');
+    var searchToggleBtn = document.getElementById('searchToggleBtn');
 
     function getDataRows() {
       var all = document.querySelectorAll('#listingsTable tbody tr');
@@ -605,11 +654,44 @@
     }
 
     if (searchInput) {
-      searchInput.addEventListener('input', filterByLocation);
+      searchInput.addEventListener('input', function() {
+        if (topSearchInput) topSearchInput.value = this.value;
+        filterBySearch();
+      });
     }
 
-    function filterByLocation() {
-      var query = searchInput.value.trim().toLowerCase();
+    if (topSearchInput) {
+      topSearchInput.addEventListener('input', function() {
+        if (searchInput) searchInput.value = this.value;
+        filterBySearch();
+      });
+    }
+
+    if (searchToggleBtn && topSearchDropdown) {
+      searchToggleBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        var isOpen = topSearchDropdown.classList.toggle('show');
+        searchToggleBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+        if (isOpen) {
+          topSearchInput && topSearchInput.focus();
+        }
+      });
+
+      document.addEventListener('click', function(e) {
+        if (topSearchDropdown && !document.getElementById('topSearchContainer').contains(e.target)) {
+          topSearchDropdown.classList.remove('show');
+          searchToggleBtn.setAttribute('aria-expanded', 'false');
+        }
+      });
+    }
+
+    function filterBySearch() {
+      var query = '';
+      if (searchInput && searchInput.value.trim().length) {
+        query = searchInput.value.trim().toLowerCase();
+      } else if (topSearchInput && topSearchInput.value.trim().length) {
+        query = topSearchInput.value.trim().toLowerCase();
+      }
 
       /* show/hide clear button */
       if (query.length > 0) {
@@ -622,36 +704,40 @@
       var visibleCount = 0;
 
       rows.forEach(function(row) {
-        /* location is the 4th td (index 3) */
-        var cells   = row.querySelectorAll('td');
-        var locText = cells[3] ? cells[3].textContent.toLowerCase() : '';
-        var match   = !query || locText.indexOf(query) !== -1;
+        var cells = row.querySelectorAll('td');
+        var rowText = Array.prototype.map.call(cells, function(cell) {
+          return cell.textContent.toLowerCase();
+        }).join(' ');
+        var match = !query || rowText.indexOf(query) !== -1;
         row.style.display = match ? '' : 'none';
         if (match) visibleCount++;
       });
 
-      /* no-results row */
       if (noResultsRow) {
         noResultsRow.style.display = (query && visibleCount === 0) ? '' : 'none';
       }
 
-      /* result label */
       if (!query) {
         resultLabel.innerHTML = '';
       } else if (visibleCount === 0) {
-        resultLabel.innerHTML = 'No listings match <strong>"' + escHtml(searchInput.value) + '"</strong>.';
+        resultLabel.innerHTML = 'No listings match <strong>"' + escHtml(query) + '"</strong>.';
       } else {
         resultLabel.innerHTML =
           '<strong>' + visibleCount + '</strong> listing' +
           (visibleCount !== 1 ? 's' : '') +
-          ' found for <strong>"' + escHtml(searchInput.value) + '"</strong>.';
+          ' found for <strong>"' + escHtml(query) + '"</strong>.';
       }
     }
 
     function clearSearch() {
-      searchInput.value = '';
-      filterByLocation();
-      searchInput.focus();
+      if (searchInput) searchInput.value = '';
+      if (topSearchInput) topSearchInput.value = '';
+      filterBySearch();
+      if (searchInput) {
+        searchInput.focus();
+      } else if (topSearchInput) {
+        topSearchInput.focus();
+      }
     }
 
     function escHtml(str) {
