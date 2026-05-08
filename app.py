@@ -52,12 +52,15 @@ def init_db():
     )
     """)
     
-    # Check if 'status' column exists (Migration)
+    # Check if 'status' and 'created_by' columns exist (Migration)
     cursor.execute("PRAGMA table_info(food_listings)")
     columns = [col[1] for col in cursor.fetchall()]
     if 'status' not in columns:
         cursor.execute("ALTER TABLE food_listings ADD COLUMN status TEXT DEFAULT 'available'")
         print("[MIGRATION] Added 'status' column to food_listings table.")
+    if 'created_by' not in columns:
+        cursor.execute("ALTER TABLE food_listings ADD COLUMN created_by TEXT")
+        print("[MIGRATION] Added 'created_by' column to food_listings table.")
 
     conn.commit()
     conn.close()
@@ -156,8 +159,8 @@ def submit():
     # Insert the new record into the database
     conn = get_db_connection()
     conn.execute(
-        "INSERT INTO food_listings (food_name, quantity, location, submitted_at) VALUES (?, ?, ?, ?)",
-        (food_name, quantity, location, submitted_at),
+        "INSERT INTO food_listings (food_name, quantity, location, submitted_at, created_by) VALUES (?, ?, ?, ?, ?)",
+        (food_name, quantity, location, submitted_at, session.get('user_name', 'Guest')),
     )
     conn.commit()
     conn.close()
@@ -238,40 +241,56 @@ def inject_notifications():
     conn = get_db_connection()
     try:
         # Fetch the latest 10 items for notifications
-        recent = conn.execute("SELECT id, food_name, status FROM food_listings ORDER BY id DESC LIMIT 10").fetchall()
+        recent = conn.execute("SELECT id, food_name, status, submitted_at, created_by FROM food_listings ORDER BY id DESC LIMIT 10").fetchall()
     except sqlite3.OperationalError:
         recent = []
     finally:
         conn.close()
     
     notifications = []
+    current_user = session.get('user_name', 'Guest')
     for item in recent:
         status = item['status']
+        created_by = item['created_by']
         if role == 'ngo':
-            if status == 'available':
-                msg = f"📢 New food donation available: {item['food_name']}"
-            elif status == 'claimed':
-                msg = f"✅ Donation confirmed: {item['food_name']}"
+            # NGOs only receive new donation notifications
+            if status != 'available':
+                continue
+            icon = '📢'
+            msg = f"New food donation available: {item['food_name']}"
+        else:  # donor
+            # Skip items not created by this donor, or items with unknown creator
+            if not created_by or created_by != current_user:
+                continue
+            if status == 'claimed':
+                icon = '✅'
+                msg = f"NGO accepted your donation: {item['food_name']}"
             elif status == 'picked_up':
-                msg = f"🎉 Pickup completed: {item['food_name']}"
-        else: # donor
-            if status == 'available':
-                msg = f"📦 Waiting for NGO to accept: {item['food_name']}"
-            elif status == 'claimed':
-                msg = f"✅ NGO accepted your donation: {item['food_name']}"
-            elif status == 'picked_up':
-                msg = f"🎉 Donation completed successfully: {item['food_name']}"
+                icon = '🎉'
+                msg = f"Food successfully collected: {item['food_name']}"
+            else:
+                continue
         
         notifications.append({
             'id': item['id'],
             'status': status,
-            'message': msg
+            'message': msg,
+            'icon': icon,
+            'timestamp': item['submitted_at']
         })
     
-    highest_id = max([n['id'] for n in notifications]) if notifications else 0
-    last_seen = session.get('last_seen_notif_id', 0)
-    has_unread = last_seen < highest_id
-    unread_count = sum(1 for n in notifications if n['id'] > last_seen)
+    # Unread calculation differs by role
+    if role == 'ngo':
+        # NGOs: track by highest ID (new items)
+        highest_id = max([n['id'] for n in notifications]) if notifications else 0
+        last_seen = session.get('last_seen_notif_id', 0)
+        has_unread = last_seen < highest_id
+        unread_count = sum(1 for n in notifications if n['id'] > last_seen)
+    else:
+        # Donors: track by whether there are status changes (notifications exist)
+        # This handles the case where existing item status changes (ID doesn't change)
+        has_unread = len(notifications) > 0
+        unread_count = len(notifications)
 
     return dict(notifications=notifications, has_unread=has_unread, unread_count=unread_count)
 

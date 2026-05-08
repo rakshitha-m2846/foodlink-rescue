@@ -271,6 +271,142 @@
       align-items: center; justify-content: center;
     }
     .modal-overlay.show { display: flex; animation: fadeIn .18s ease; }
+    .notification-modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.45);
+      backdrop-filter: blur(2px);
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      padding: 1.5rem;
+    }
+    .notification-modal-overlay.show { display: flex; }
+    .notification-modal-box {
+      width: min(100%, 660px);
+      max-height: 90vh;
+      overflow: hidden;
+      background: rgba(255,255,255,.98);
+      border-radius: 20px;
+      box-shadow: 0 24px 70px rgba(0,0,0,.25);
+      position: relative;
+      padding: 1.5rem;
+    }
+    .notification-modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+    .notification-modal-header h2 {
+      margin: 0;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--green-dark);
+    }
+    .notification-list {
+      max-height: calc(90vh - 150px);
+      overflow-y: auto;
+      padding-right: .25rem;
+    }
+    .notification-item {
+      display: flex;
+      gap: .85rem;
+      padding: .95rem 1rem;
+      border-radius: 16px;
+      background: var(--gray-50);
+      border: 1px solid var(--gray-100);
+      margin-bottom: .85rem;
+    }
+    .notification-icon {
+      font-size: 1.2rem;
+      line-height: 1;
+      margin-top: 0.15rem;
+      flex-shrink: 0;
+    }
+    .notification-body {
+      min-width: 0;
+    }
+    .notification-message {
+      margin: 0 0 .35rem;
+      color: var(--gray-900);
+      font-size: .96rem;
+      font-weight: 600;
+      line-height: 1.4;
+      word-break: break-word;
+    }
+    .notification-time {
+      color: var(--gray-500);
+      font-size: .84rem;
+      line-height: 1.4;
+    }
+    .notification-empty {
+      min-height: 180px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      text-align: center;
+      color: var(--gray-600);
+      background: var(--gray-50);
+      border: 1px solid var(--gray-100);
+      border-radius: 16px;
+      font-size: .95rem;
+    }
+    .help-modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.45);
+      backdrop-filter: blur(2px);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+    .help-modal-overlay.show { display: flex; }
+    .help-modal-box {
+      width: min(100%, 960px);
+      max-height: 90vh;
+      overflow-y: auto;
+      background: rgba(255,255,255,.98);
+      border-radius: 20px;
+      box-shadow: 0 24px 70px rgba(0,0,0,.25);
+      position: relative;
+      padding: 1.5rem;
+    }
+    .hiw { max-width: 840px; margin: 0 auto 5rem; padding: 0 1.5rem; text-align: center; }
+    .hiw h2 { font-size: 1.4rem; font-weight: 700; color: var(--green-dark); margin-bottom: 2rem; }
+    .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 1.4rem; }
+    .step {
+      background: #fff; border-radius: var(--radius); padding: 1.8rem 1.4rem;
+      box-shadow: 0 1px 6px rgba(0,0,0,.07); border: 1px solid var(--gray-100);
+      transition: transform .2s, box-shadow .2s;
+    }
+    .step:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(0,0,0,.1); }
+    .step-num {
+      width: 40px; height: 40px; background: var(--green-light); color: var(--green-dark);
+      border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
+      font-weight: 800; margin-bottom: .9rem;
+    }
+    .step h3 { font-size: .97rem; font-weight: 700; margin-bottom: .35rem; }
+    .step p  { font-size: .83rem; color: var(--gray-500); line-height: 1.6; }
+    .help-modal-close {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      width: 36px;
+      height: 36px;
+      border: none;
+      border-radius: 50%;
+      background: #fff;
+      color: var(--gray-700);
+      font-size: 1.1rem;
+      cursor: pointer;
+      box-shadow: 0 6px 18px rgba(0,0,0,.12);
+    }
     @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
 
     .modal-box {
@@ -409,7 +545,7 @@
         </div>
       </div>
       {% if session.get('role') %}
-      <a href="/notifications" class="icon-btn bell-icon" title="Notifications">
+      <a href="#" class="icon-btn bell-icon" id="notificationBell" role="button" title="Notifications">
         <svg viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
         {% if unread_count > 0 %}
         <div class="red-dot">{{ unread_count }}</div>
@@ -427,6 +563,7 @@
           </div>
           <div class="profile-list">
             <a href="/switch-role" class="profile-item">Switch Role</a>
+            <a href="#" class="profile-item" id="helpBtn">Help</a>
             <a href="/logout" class="profile-item" style="color: #ef4444;">Logout</a>
           </div>
         </div>
@@ -562,6 +699,56 @@
   <footer>
     <p>Made with ❤️ by <strong>FoodLink Rescue</strong> — Together we can end food waste.</p>
   </footer>
+
+  <div class="notification-modal-overlay" id="notificationModal" aria-hidden="true">
+    <div class="notification-modal-box" role="dialog" aria-modal="true" aria-labelledby="notificationModalTitle">
+      <button class="help-modal-close" id="notificationCloseBtn" aria-label="Close Notifications">×</button>
+      <div class="notification-modal-header">
+        <h2 id="notificationModalTitle">Notifications</h2>
+      </div>
+      <div class="notification-list">
+        {% if notifications %}
+          {% for n in notifications %}
+          <div class="notification-item">
+            <div class="notification-icon">{{ n.icon }}</div>
+            <div class="notification-body">
+              <div class="notification-message">{{ n.message }}</div>
+              <div class="notification-time">{{ n.timestamp }}</div>
+            </div>
+          </div>
+          {% endfor %}
+        {% else %}
+          <div class="notification-empty">No new notifications yet.</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="help-modal-overlay" id="helpModal" aria-hidden="true">
+    <div class="help-modal-box" role="dialog" aria-modal="true" aria-labelledby="helpModalTitle">
+      <button class="help-modal-close" id="helpCloseBtn" aria-label="Close Help">×</button>
+      <section class="hiw" id="helpSection">
+        <h2 id="helpModalTitle">How FoodLink Rescue Works</h2>
+        <div class="steps">
+          <div class="step">
+            <div class="step-num">1</div>
+            <h3>Restaurant Lists Food</h3>
+            <p>Any restaurant or food business submits their surplus food via the simple form above.</p>
+          </div>
+          <div class="step">
+            <div class="step-num">2</div>
+            <h3>NGO Browses Listings</h3>
+            <p>Registered NGOs and volunteers browse the live listings page to find available donations nearby.</p>
+          </div>
+          <div class="step">
+            <div class="step-num">3</div>
+            <h3>Food Gets Collected</h3>
+            <p>The NGO travels to the pickup location, collects the food, and marks the listing as claimed.</p>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
 
   <!-- ── CUSTOM DELETE CONFIRMATION MODAL ── -->
   <div class="modal-overlay" id="deleteModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
@@ -763,12 +950,79 @@
       document.getElementById('delete-form-' + pendingDeleteId).submit();
     }
 
+    var notificationBell = document.getElementById('notificationBell');
+    var notificationModal = document.getElementById('notificationModal');
+    var notificationCloseBtn = document.getElementById('notificationCloseBtn');
+    var notificationBadge = document.querySelector('.bell-icon .red-dot');
+
+    function markNotificationsRead() {
+      if (notificationBadge) {
+        notificationBadge.remove();
+      }
+      fetch('/notifications', { method: 'GET', credentials: 'same-origin' })
+        .catch(function() {
+          // ignore network errors; badge already cleared visually
+        });
+    }
+
+    if (notificationBell && notificationModal) {
+      notificationBell.addEventListener('click', function(e) {
+        e.preventDefault();
+        markNotificationsRead();
+        notificationModal.classList.add('show');
+      });
+    }
+
+    if (notificationCloseBtn && notificationModal) {
+      notificationCloseBtn.addEventListener('click', function() {
+        notificationModal.classList.remove('show');
+      });
+    }
+
+    var helpBtn = document.getElementById('helpBtn');
+    var helpModal = document.getElementById('helpModal');
+    var helpCloseBtn = document.getElementById('helpCloseBtn');
+
+    if (notificationModal) {
+      notificationModal.addEventListener('click', function(e) {
+        if (e.target === this) {
+          notificationModal.classList.remove('show');
+        }
+      });
+    }
+
+    if (helpBtn && helpModal) {
+      helpBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        helpModal.classList.add('show');
+        if (profileDropdown) profileDropdown.classList.remove('show');
+      });
+    }
+
+    if (helpCloseBtn && helpModal) {
+      helpCloseBtn.addEventListener('click', function() {
+        helpModal.classList.remove('show');
+      });
+    }
+
+    if (helpModal) {
+      helpModal.addEventListener('click', function(e) {
+        if (e.target === this) {
+          helpModal.classList.remove('show');
+        }
+      });
+    }
+
     document.getElementById('deleteModal').addEventListener('click', function(e) {
       if (e.target === this) closeDeleteModal();
     });
 
     document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape') closeDeleteModal();
+      if (e.key === 'Escape') {
+        closeDeleteModal();
+        if (notificationModal) notificationModal.classList.remove('show');
+        if (helpModal) helpModal.classList.remove('show');
+      }
     });
   </script>
 
