@@ -222,6 +222,11 @@
       box-shadow: 0 8px 32px rgba(0,0,0,.10); overflow: hidden;
       border: 1px solid var(--gray-100);
     }
+
+    /* ── SEARCH RESULT CONTAINER ── */
+    .search-result-container {
+      max-width: 1000px; margin: 0 auto; padding: 0 1.5rem;
+    }
     table { width: 100%; border-collapse: collapse; }
     thead { background: var(--green-dark); }
     thead th {
@@ -603,10 +608,12 @@
   </div>
 
   <!-- SEARCH RESULT LABEL -->
+  <div class="search-result-container">
+    <div class="search-result-label" id="searchResultLabel"></div>
+  </div>
 
   <!-- TABLE / EMPTY STATE -->
   <div class="table-wrap">
-    <div class="search-result-label" id="searchResultLabel"></div>
     <div class="table-card">
 
       {% if listings %}
