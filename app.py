@@ -62,9 +62,33 @@ def init_db():
         cursor.execute("ALTER TABLE food_listings ADD COLUMN created_by TEXT")
         print("[MIGRATION] Added 'created_by' column to food_listings table.")
 
+    cursor.execute("""
+    CREATE TABLE IF NOT EXISTS notifications (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        recipient_role TEXT NOT NULL,
+        recipient_user TEXT,
+        message TEXT NOT NULL,
+        icon TEXT,
+        timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+        read INTEGER DEFAULT 0,
+        listing_id INTEGER
+    )
+    """)
+
     conn.commit()
     conn.close()
     print("[OK] Database verified.")
+
+
+def create_notification(recipient_role, recipient_user, message, icon, listing_id=None):
+    conn = get_db_connection()
+    conn.execute(
+        "INSERT INTO notifications (recipient_role, recipient_user, message, icon, timestamp, read, listing_id) VALUES (?, ?, ?, ?, ?, 0, ?)",
+        (recipient_role, recipient_user, message, icon, datetime.now().strftime("%Y-%m-%d %H:%M:%S"), listing_id),
+    )
+    conn.commit()
+    conn.close()
+
 
 # Call this function when the app starts (essential for Gunicorn deployments)
 init_db()
@@ -158,12 +182,22 @@ def submit():
 
     # Insert the new record into the database
     conn = get_db_connection()
-    conn.execute(
+    cursor = conn.cursor()
+    cursor.execute(
         "INSERT INTO food_listings (food_name, quantity, location, submitted_at, created_by) VALUES (?, ?, ?, ?, ?)",
         (food_name, quantity, location, submitted_at, session.get('user_name', 'Guest')),
     )
+    listing_id = cursor.lastrowid
     conn.commit()
     conn.close()
+
+    create_notification(
+        recipient_role='ngo',
+        recipient_user=None,
+        message=f"New food donation available: {food_name}",
+        icon='📢',
+        listing_id=listing_id,
+    )
 
     print(f"[NEW] Listing added: {food_name} | {quantity} | {location}")
 
@@ -209,9 +243,24 @@ def claim(listing_id):
     if session.get("role") != "ngo":
         return redirect(url_for("view"))
     conn = get_db_connection()
-    conn.execute("UPDATE food_listings SET status = 'claimed' WHERE id = ?", (listing_id,))
-    conn.commit()
+    listing = conn.execute(
+        "SELECT food_name, created_by FROM food_listings WHERE id = ?",
+        (listing_id,),
+    ).fetchone()
+    if listing:
+        conn.execute("UPDATE food_listings SET status = 'claimed' WHERE id = ?", (listing_id,))
+        conn.commit()
     conn.close()
+
+    if listing and listing['created_by']:
+        create_notification(
+            recipient_role='donor',
+            recipient_user=listing['created_by'],
+            message=f"NGO accepted your donation: {listing['food_name']}",
+            icon='✅',
+            listing_id=listing_id,
+        )
+
     return redirect(url_for("view"))
 
 
@@ -223,9 +272,24 @@ def pickup(listing_id):
     if session.get("role") != "ngo":
         return redirect(url_for("view"))
     conn = get_db_connection()
-    conn.execute("UPDATE food_listings SET status = 'picked_up' WHERE id = ?", (listing_id,))
-    conn.commit()
+    listing = conn.execute(
+        "SELECT food_name, created_by FROM food_listings WHERE id = ?",
+        (listing_id,),
+    ).fetchone()
+    if listing:
+        conn.execute("UPDATE food_listings SET status = 'picked_up' WHERE id = ?", (listing_id,))
+        conn.commit()
     conn.close()
+
+    if listing and listing['created_by']:
+        create_notification(
+            recipient_role='donor',
+            recipient_user=listing['created_by'],
+            message=f"Food successfully collected: {listing['food_name']}",
+            icon='🎉',
+            listing_id=listing_id,
+        )
+
     return redirect(url_for("view"))
 
 
@@ -240,57 +304,33 @@ def inject_notifications():
         
     conn = get_db_connection()
     try:
-        # Fetch the latest 10 items for notifications
-        recent = conn.execute("SELECT id, food_name, status, submitted_at, created_by FROM food_listings ORDER BY id DESC LIMIT 10").fetchall()
+        if role == 'ngo':
+            recent = conn.execute(
+                "SELECT id, message, icon, timestamp, read FROM notifications WHERE recipient_role = 'ngo' ORDER BY id DESC LIMIT 10"
+            ).fetchall()
+        else:
+            current_user = session.get('user_name', 'Guest')
+            recent = conn.execute(
+                "SELECT id, message, icon, timestamp, read FROM notifications WHERE recipient_role = 'donor' AND recipient_user = ? ORDER BY id DESC LIMIT 10",
+                (current_user,),
+            ).fetchall()
     except sqlite3.OperationalError:
         recent = []
     finally:
         conn.close()
     
     notifications = []
-    current_user = session.get('user_name', 'Guest')
     for item in recent:
-        status = item['status']
-        created_by = item['created_by']
-        if role == 'ngo':
-            # NGOs only receive new donation notifications
-            if status != 'available':
-                continue
-            icon = '📢'
-            msg = f"New food donation available: {item['food_name']}"
-        else:  # donor
-            # Skip items not created by this donor, or items with unknown creator
-            if not created_by or created_by != current_user:
-                continue
-            if status == 'claimed':
-                icon = '✅'
-                msg = f"NGO accepted your donation: {item['food_name']}"
-            elif status == 'picked_up':
-                icon = '🎉'
-                msg = f"Food successfully collected: {item['food_name']}"
-            else:
-                continue
-        
         notifications.append({
             'id': item['id'],
-            'status': status,
-            'message': msg,
-            'icon': icon,
-            'timestamp': item['submitted_at']
+            'message': item['message'],
+            'icon': item['icon'],
+            'timestamp': item['timestamp'],
+            'read': item['read'],
         })
-    
-    # Unread calculation differs by role
-    if role == 'ngo':
-        # NGOs: track by highest ID (new items)
-        highest_id = max([n['id'] for n in notifications]) if notifications else 0
-        last_seen = session.get('last_seen_notif_id', 0)
-        has_unread = last_seen < highest_id
-        unread_count = sum(1 for n in notifications if n['id'] > last_seen)
-    else:
-        # Donors: track by whether there are status changes (notifications exist)
-        # This handles the case where existing item status changes (ID doesn't change)
-        has_unread = len(notifications) > 0
-        unread_count = len(notifications)
+
+    unread_count = sum(1 for n in notifications if n['read'] == 0)
+    has_unread = unread_count > 0
 
     return dict(notifications=notifications, has_unread=has_unread, unread_count=unread_count)
 
@@ -299,16 +339,25 @@ def notifications_page():
     """
     Displays the notifications and clears the unread state.
     """
-    # Calculate highest id to mark as read
-    conn = get_db_connection()
-    try:
-        latest = conn.execute("SELECT id FROM food_listings ORDER BY id DESC LIMIT 1").fetchone()
-        if latest:
-            session['last_seen_notif_id'] = latest['id']
-    except sqlite3.OperationalError:
-        pass
-    finally:
-        conn.close()
+    role = session.get('role')
+    current_user = session.get('user_name', 'Guest')
+    if role:
+        conn = get_db_connection()
+        try:
+            if role == 'ngo':
+                conn.execute(
+                    "UPDATE notifications SET read = 1 WHERE recipient_role = 'ngo' AND read = 0"
+                )
+            else:
+                conn.execute(
+                    "UPDATE notifications SET read = 1 WHERE recipient_role = 'donor' AND recipient_user = ? AND read = 0",
+                    (current_user,),
+                )
+            conn.commit()
+        except sqlite3.OperationalError:
+            pass
+        finally:
+            conn.close()
     return render_template("notifications.html")
 
 
