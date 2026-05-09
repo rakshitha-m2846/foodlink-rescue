@@ -519,6 +519,16 @@
     @media (max-width: 640px) {
       thead th:nth-child(4), tbody td:nth-child(4) { display: none; }
       .page-header { flex-direction: column; align-items: flex-start; }
+      .table-wrap {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+      }
+      .table-card {
+        overflow: visible;
+      }
+      table {
+        min-width: 720px;
+      }
     }
   </style>
 </head>
