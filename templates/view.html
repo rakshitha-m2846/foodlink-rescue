@@ -481,7 +481,8 @@
     .search-clear.visible { display: block; }
     .search-clear:hover { background: var(--gray-200); }
     .search-result-label {
-      font-size: .82rem; color: var(--gray-500); margin-top: .5rem;
+      font-size: .82rem; color: var(--gray-500);
+      margin: .5rem 0 1rem;
       padding-left: .2rem;
       min-height: 1.2em;
     }
@@ -591,8 +592,11 @@
     </div>
   </div>
 
+  <!-- SEARCH RESULT LABEL -->
+
   <!-- TABLE / EMPTY STATE -->
   <div class="table-wrap">
+    <div class="search-result-label" id="searchResultLabel"></div>
     <div class="table-card">
 
       {% if listings %}
@@ -800,12 +804,9 @@
     });
     {% endif %}
 
-    /* ============================================================
-       LOCATION SEARCH - filters table rows as the user types
+    /* LOCATION SEARCH - filters table rows as the user types
        ============================================================ */
     var topSearchInput = document.getElementById('topSearchInput');
-    var searchInput    = document.getElementById('locationSearch');
-    var clearBtn       = document.getElementById('searchClearBtn');
     var resultLabel    = document.getElementById('searchResultLabel');
     var noResultsRow   = document.getElementById('noResultsRow');
     var topSearchDropdown = document.getElementById('topSearchDropdown');
@@ -818,16 +819,8 @@
       });
     }
 
-    if (searchInput) {
-      searchInput.addEventListener('input', function() {
-        if (topSearchInput) topSearchInput.value = this.value;
-        filterBySearch();
-      });
-    }
-
     if (topSearchInput) {
       topSearchInput.addEventListener('input', function() {
-        if (searchInput) searchInput.value = this.value;
         filterBySearch();
       });
     }
@@ -852,17 +845,8 @@
 
     function filterBySearch() {
       var query = '';
-      if (searchInput && searchInput.value.trim().length) {
-        query = searchInput.value.trim().toLowerCase();
-      } else if (topSearchInput && topSearchInput.value.trim().length) {
+      if (topSearchInput && topSearchInput.value.trim().length) {
         query = topSearchInput.value.trim().toLowerCase();
-      }
-
-      /* show/hide clear button */
-      if (query.length > 0) {
-        clearBtn.classList.add('visible');
-      } else {
-        clearBtn.classList.remove('visible');
       }
 
       var rows = getDataRows();
@@ -882,26 +866,17 @@
         noResultsRow.style.display = (query && visibleCount === 0) ? '' : 'none';
       }
 
-      if (!query) {
-        resultLabel.innerHTML = '';
-      } else if (visibleCount === 0) {
-        resultLabel.innerHTML = 'No listings match <strong>"' + escHtml(query) + '"</strong>.';
-      } else {
-        resultLabel.innerHTML =
-          '<strong>' + visibleCount + '</strong> listing' +
-          (visibleCount !== 1 ? 's' : '') +
-          ' found for <strong>"' + escHtml(query) + '"</strong>.';
-      }
-    }
-
-    function clearSearch() {
-      if (searchInput) searchInput.value = '';
-      if (topSearchInput) topSearchInput.value = '';
-      filterBySearch();
-      if (searchInput) {
-        searchInput.focus();
-      } else if (topSearchInput) {
-        topSearchInput.focus();
+      if (resultLabel) {
+        if (!query) {
+          resultLabel.innerHTML = '';
+        } else if (visibleCount === 0) {
+          resultLabel.innerHTML = 'No matching results found';
+        } else {
+          resultLabel.innerHTML =
+            '<strong>' + visibleCount + '</strong> listing' +
+            (visibleCount !== 1 ? 's' : '') +
+            ' found';
+        }
       }
     }
 
