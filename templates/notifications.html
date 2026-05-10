@@ -153,6 +153,43 @@
       display: inline-block; margin-bottom: 15px;
       text-decoration: none; color: #10b981; font-weight: 600;
     }
+
+    /* ── MOBILE RESPONSIVENESS ── */
+    @media (max-width: 768px) {
+      .navbar { padding: 10px 16px; }
+      .brand { font-size: 1rem; }
+      .container { max-width: 100%; padding: 0 1.5rem; margin: 15px auto; }
+      h1 { font-size: 1.6rem; margin-bottom: 15px; }
+      .notif-card { padding: 15px; margin-bottom: 12px; gap: 12px; }
+      .notif-text { font-size: 0.95rem; }
+    }
+
+    @media (max-width: 640px) {
+      .navbar { padding: 8px 12px; }
+      .brand { font-size: 0.9rem; }
+      .header-actions { gap: 10px; }
+      .container { padding: 0 1rem; margin: 12px auto; }
+      h1 { font-size: 1.4rem; margin-bottom: 12px; }
+      .notif-card { padding: 12px; margin-bottom: 10px; gap: 10px; flex-direction: column; }
+      .notif-text { font-size: 0.9rem; }
+      .empty-state { padding: 3rem 1.5rem; }
+      .empty-state .bell-large { font-size: 3rem; }
+      .empty-state h3 { font-size: 1rem; }
+      .empty-state p { font-size: 0.8rem; }
+      .top-search-input { font-size: 14px; }
+    }
+
+    @media (max-width: 480px) {
+      body { padding: 0; }
+      .navbar { padding: 6px 10px; }
+      .header-actions { gap: 8px; }
+      .container { padding: 0 0.8rem; margin: 10px auto; }
+      h1 { font-size: 1.2rem; }
+      .notif-card { padding: 10px; margin-bottom: 8px; }
+      .notif-text { font-size: 0.85rem; }
+      .empty-state { padding: 2rem 1rem; }
+      .empty-state .bell-large { font-size: 2.5rem; }
+    }
   </style>
 </head>
 <body>

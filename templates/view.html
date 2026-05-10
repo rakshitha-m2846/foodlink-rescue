@@ -227,7 +227,7 @@
     .search-result-container {
       max-width: 1000px; margin: 0 auto; padding: 0 1.5rem;
     }
-    table { width: 100%; border-collapse: collapse; }
+    table { width: 100%; border-collapse: collapse; word-wrap: break-word; }
     thead { background: var(--green-dark); }
     thead th {
       padding: 1rem 1.2rem; text-align: left;
@@ -237,7 +237,7 @@
     tbody tr { border-bottom: 1px solid var(--gray-100); transition: background .15s; }
     tbody tr:last-child { border-bottom: none; }
     tbody tr:hover { background: var(--gray-50); }
-    tbody td { padding: 1rem 1.2rem; font-size: .9rem; vertical-align: middle; }
+    tbody td { padding: 1rem 1.2rem; font-size: .9rem; vertical-align: middle; background: #fff; }
     .food-name { font-weight: 700; color: var(--gray-900); }
     .qty-badge {
       display: inline-block;
@@ -382,7 +382,7 @@
       position: relative;
       padding: 1.5rem;
     }
-    .hiw { max-width: 840px; margin: 0 auto 5rem; padding: 0 1.5rem; text-align: center; }
+    .hiw { max-width: 840px; margin: 0 auto 5rem; padding: 0 1.5rem; text-align: center; word-wrap: break-word; }
     .hiw h2 { font-size: 1.4rem; font-weight: 700; color: var(--green-dark); margin-bottom: 2rem; }
     .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 1.4rem; }
     .step {
@@ -521,19 +521,71 @@
     footer strong { color: #fff; }
 
     /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      .navbar { padding: 10px 16px; }
+      .brand { font-size: 1rem; }
+      .page-header { padding: 2rem 1.5rem; gap: 1rem; }
+      .page-header h1 { font-size: clamp(1.4rem, 4vw, 1.8rem); }
+      .page-header p { font-size: 0.85rem; }
+      .stats-bar { padding: 0 1.5rem; gap: 0.8rem; }
+      .stat-chip { padding: 0.5rem 1rem; font-size: 0.8rem; }
+      .search-wrap { padding: 0 1.5rem; }
+      .search-result-container { padding: 0 1.5rem; }
+      .search-result-label { font-size: 0.78rem; }
+      .table-wrap { padding: 0 1.5rem; }
+      tbody td { padding: 0.8rem; font-size: 0.85rem; }
+    }
+
     @media (max-width: 640px) {
       thead th:nth-child(4), tbody td:nth-child(4) { display: none; }
-      .page-header { flex-direction: column; align-items: flex-start; }
+      .page-header { flex-direction: column; align-items: flex-start; padding: 1.5rem 1rem; }
+      .btn-donate { padding: 10px 16px; font-size: 0.85rem; }
+      .stats-bar { padding: 0 1rem; margin: 0 auto 1rem; }
+      .stat-chip { padding: 0.45rem 0.9rem; font-size: 0.75rem; }
+      .search-wrap { padding: 0 1rem; margin: 0 auto 0.8rem; }
+      .search-box { padding: 0.45rem 0.45rem 0.45rem 0.8rem; }
+      .search-result-container { padding: 0 1rem; margin: 0 auto; }
+      .search-result-label { font-size: 0.75rem; margin: 0.4rem 0 0.8rem; }
       .table-wrap {
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
+        padding: 0 1rem;
       }
-      .table-card {
-        overflow: visible;
-      }
+      .table-card { overflow: visible; border-radius: 10px; }
       table {
         min-width: 720px;
       }
+      thead th { padding: 0.8rem; font-size: 0.7rem; }
+      tbody td { padding: 0.7rem; font-size: 0.8rem; }
+      .empty-state { padding: 3rem 1.5rem; }
+      .empty-state .empty-icon { font-size: 2.5rem; }
+      .empty-state h3 { font-size: 1rem; }
+      .empty-state p { font-size: 0.8rem; }
+      .hiw { padding: 0 1rem; }
+      .modal-box { width: 90%; padding: 1.5rem; }
+      .modal-icon { font-size: 2.5rem; }
+      #deleteModal h3 { font-size: 1rem; }
+      .help-modal-box { width: 95%; max-height: 80vh; overflow-y: auto; padding: 1.5rem 1.2rem; }
+      .step { margin-bottom: 1.2rem; }
+      .step-num { width: 36px; height: 36px; font-size: 1rem; }
+      .hiw h2 { font-size: 1.3rem; }
+    }
+
+    @media (max-width: 480px) {
+      .navbar { padding: 8px 12px; }
+      .header-actions { gap: 10px; }
+      .page-header { padding: 1.2rem 0.8rem; }
+      .page-header h1 { font-size: 1.3rem; }
+      .page-header p { font-size: 0.75rem; }
+      .btn-donate { padding: 8px 12px; font-size: 0.8rem; }
+      .stats-bar { padding: 0 0.8rem; margin: 0 auto 0.8rem; }
+      .stat-chip { padding: 0.4rem 0.8rem; font-size: 0.7rem; }
+      .search-box { flex-direction: column; gap: 0.4rem; }
+      .search-result-label { font-size: 0.7rem; }
+      .notification-modal-box { width: 95vw; max-height: 70vh; }
+      .notification-item { gap: 10px; padding: 12px; }
+      .modal-box { padding: 1.2rem 1rem; }
+      footer { padding: 0.8rem; font-size: 0.7rem; }
     }
   </style>
 </head>

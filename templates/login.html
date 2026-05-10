@@ -76,6 +76,37 @@
     .status-msg.info    { color: #6b7280; }
     .step { display: none; }
     .step.active { display: block; }
+
+    /* ── MOBILE RESPONSIVENESS ── */
+    @media (max-width: 480px) {
+      body { padding: 1rem; }
+      .login-card {
+        padding: 30px 20px;
+        max-width: 100%;
+        border-radius: 12px;
+      }
+      h1 { font-size: 1.4rem; margin-bottom: 20px; }
+      .form-group { margin-bottom: 16px; }
+      label { font-size: 0.8rem; }
+      input[type="text"],
+      input[type="tel"] {
+        font-size: 16px;
+        padding: 12px;
+      }
+      .phone-row { gap: 6px; }
+      .phone-prefix { font-size: 0.85rem; padding: 12px 8px; }
+      .role-buttons { gap: 8px; margin-top: 12px; }
+      .btn-role {
+        padding: 10px;
+        font-size: 0.85rem;
+      }
+      .btn-otp {
+        padding: 12px;
+        font-size: 0.9rem;
+        margin-top: 8px;
+      }
+      .status-msg { font-size: 0.75rem; }
+    }
   </style>
 </head>
 <body>

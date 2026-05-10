@@ -439,6 +439,38 @@
     /* FOOTER */
     footer { background: var(--green-dark); color: rgba(255,255,255,.65); text-align: center; padding: 1.4rem; font-size: .85rem; }
     footer strong { color: #fff; }
+
+    /* ── MOBILE RESPONSIVENESS ── */
+    @media (max-width: 768px) {
+      .navbar { padding: 10px 16px; }
+      .brand { font-size: 1rem; }
+      .header-actions { gap: 12px; }
+      .hero { padding: 3rem 1.5rem; }
+      .hero h2 { font-size: clamp(1.8rem, 5vw, 2.2rem); }
+      .hero p { font-size: 0.95rem; max-width: 100%; }
+      .form-section { padding: 2rem 1.5rem; max-width: 100%; }
+      .form-group { margin-bottom: 18px; }
+      label { font-size: 0.85rem; }
+      input, select { font-size: 16px; padding: 12px; }
+      button { padding: 12px 18px; font-size: 0.95rem; }
+      .steps { padding: 0 1.5rem; }
+      .step { margin-bottom: 1.5rem; }
+      .step-num { width: 40px; height: 40px; font-size: 1.1rem; }
+      .hiw h2 { font-size: 1.6rem; }
+      .steps { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 480px) {
+      .navbar { padding: 8px 12px; flex-wrap: wrap; }
+      .brand { font-size: 0.95rem; }
+      .hero { padding: 2rem 1rem; }
+      .hero h2 { font-size: 1.6rem; }
+      .form-section { padding: 1.5rem 1rem; }
+      .form-group { margin-bottom: 16px; }
+      input, select, button { font-size: 16px; border-radius: 8px; }
+      .top-search-input { font-size: 14px; padding: 10px 12px; }
+      footer { padding: 1rem; font-size: 0.75rem; }
+    }
   </style>
 </head>
 <body>
